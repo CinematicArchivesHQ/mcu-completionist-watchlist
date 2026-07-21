@@ -1,10 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { deleteDoc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { onAuthStateChanged, type User } from "firebase/auth";
 import { entries, sourceCount, totalRuntime, type WatchEntry } from "./data";
 import { episodeMetadata } from "./episode-metadata";
 import { episodeMetadataOverrides, metadataKey, metadataOverrides, normalizeGenres } from "./metadata-overrides";
 import { achievementData, divisionFor, franchiseFor, infinityStones, orderEntries, presetMatches, searchCreditsFor, upcomingProjects, yearFor, type Profile, type UpcomingProject, type WatchOrder } from "./catalog";
+import { archiveDocument, auth, signInWithGoogle, signOutGoogle } from "./firebase";
 
 type View = "archive" | "analytics" | "timeline" | "history" | "settings";
 type Filter = "all" | "movie" | "episode" | "special" | "short" | "remaining" | "favorites";
@@ -18,7 +21,8 @@ const SPOILER_KEY = "infinity-archive-hide-spoilers";
 const HIDE_WATCHED_KEY = "infinity-archive-hide-watched";
 const PROFILES_KEY = "infinity-archive-profiles-v1";
 const ACTIVE_PROFILE_KEY = "infinity-archive-active-profile-v1";
-const APP_VERSION = "2.3.1";
+const DELETED_PROFILES_KEY = "infinity-archive-deleted-profiles-v1";
+const APP_VERSION = "2.4.0";
 const METADATA_VERSION = "2026.07.21-v14.1";
 const ACHIEVEMENTS_SEEN_KEY = "infinity-archive-achievements-seen-v1";
 const posterCache = new Map<string, string | null>();
@@ -87,6 +91,58 @@ const themes = [
 ] as const;
 type Theme = typeof themes[number]["id"];
 type ActivityEvent = { id: string; at: string; type: "viewed" | "edited" };
+type SyncStatus = "local" | "connecting" | "syncing" | "synced" | "offline" | "error";
+type CloudArchive = {
+  schemaVersion: 4;
+  appVersion: string;
+  updatedAt: string;
+  activeProfileId: string;
+  profiles: Profile[];
+  deletedProfiles?: Record<string, string>;
+  preferences: { hideSpoilers: boolean; hideWatched: boolean };
+};
+
+function uniqueBy<T>(items: T[], key: (item: T) => string) {
+  return [...new Map(items.map((item) => [key(item), item])).values()];
+}
+
+function mergeProfile(local: Profile, cloud: Profile): Profile {
+  const localWins = (local.updatedAt || "") >= (cloud.updatedAt || "");
+  const newest = localWins ? local : cloud;
+  return {
+    ...newest,
+    completed: [...new Set([...local.completed, ...cloud.completed])],
+    history: uniqueBy([...local.history, ...cloud.history], (event) => `${event.id}|${event.at}`).sort((a, b) => a.at.localeCompare(b.at)),
+    activity: uniqueBy([...(local.activity || []), ...(cloud.activity || [])], (event) => `${event.id}|${event.type}|${event.at}`).sort((a, b) => a.at.localeCompare(b.at)).slice(-250),
+    createdAt: [local.createdAt, cloud.createdAt].filter(Boolean).sort()[0] || newest.createdAt,
+    updatedAt: [local.updatedAt, cloud.updatedAt].filter(Boolean).sort().at(-1) || newest.updatedAt,
+  };
+}
+
+function mergeArchives(local: CloudArchive, cloud: CloudArchive): CloudArchive {
+  const deletedProfiles = { ...(cloud.deletedProfiles || {}), ...(local.deletedProfiles || {}) };
+  const byId = new Map(local.profiles.map((profile) => [profile.id, profile]));
+  cloud.profiles.forEach((profile) => {
+    const existing = byId.get(profile.id);
+    byId.set(profile.id, existing ? mergeProfile(existing, profile) : profile);
+  });
+  const profiles = [...byId.values()].filter((profile) => !deletedProfiles[profile.id] || deletedProfiles[profile.id] < profile.updatedAt);
+  const localWins = local.updatedAt >= cloud.updatedAt;
+  const preferredActive = localWins ? local.activeProfileId : cloud.activeProfileId;
+  return {
+    ...(localWins ? local : cloud),
+    schemaVersion: 4,
+    appVersion: APP_VERSION,
+    updatedAt: new Date().toISOString(),
+    profiles,
+    deletedProfiles,
+    activeProfileId: profiles.some((profile) => profile.id === preferredActive) ? preferredActive : profiles[0]?.id || "default",
+  };
+}
+
+function archiveFingerprint(archive: CloudArchive) {
+  return JSON.stringify({ ...archive, updatedAt: "" });
+}
 
 async function wikidataLabels(ids: string[]) {
   if (!ids.length) return [];
@@ -240,7 +296,7 @@ function DetailDrawer({ entry, completed, hideSpoilers, rating, favorite, note, 
         {!!details?.genres?.length && <p className="genre-row">{details.genres.join(" · ")}</p>}
         <div className={`drawer-description ${concealed ? "concealed" : ""}`}>{loading ? "Retrieving archive details…" : concealed ? "Episode description hidden until you complete it." : details?.description || "Detailed information is not available for this entry yet."}</div>
         {!!details?.cast?.length && !concealed && <p className="cast-row"><span>Starring</span>{details.cast.join(" · ")}</p>}
-        <section className="personal-record"><div><span>Your rating</span><div className="stars" aria-label="Your rating">{[1,2,3,4,5].map((star) => <button key={star} className={star <= rating ? "active" : ""} onClick={() => onRating(star === rating ? 0 : star)} aria-label={star === rating ? "Clear rating" : `${star} stars`}>★</button>)}{rating > 0 && <button className="clear-rating" onClick={() => onRating(0)}>Clear</button>}</div></div><button className={favorite ? "favorite active" : "favorite"} onClick={onFavorite}>{favorite ? "♥ Favorite" : "♡ Add favorite"}</button><label className="watched-date"><span>First watched</span><input type="date" max={localDateKey()} value={watchDates[0]?.slice(0, 10) || ""} onChange={(event) => onWatchedDate(event.target.value)} /><small>{watchDates.length > 1 ? `${watchDates.length} total viewings · latest ${displayWatchedDate(watchDates.at(-1)!)}` : "Selecting a date also marks this entry complete."}</small></label>{completed && <div className="rewatch-control"><span>Watch again</span><div><input type="date" max={localDateKey()} value={rewatchDate} onChange={(event) => setRewatchDate(event.target.value)} /><button onClick={() => rewatchDate && onRewatch(rewatchDate)}>Add viewing</button></div>{watchDates.length > 1 && <small>{watchDates.slice(1).map(displayWatchedDate).join(" · ")}</small>}</div>}<label><span>Private notes</span><textarea value={note} onChange={(event) => onNote(event.target.value)} placeholder="Add thoughts, callbacks, or rewatch notes…" /></label><small>Saved only on this device and included in your backup.</small></section>
+        <section className="personal-record"><div><span>Your rating</span><div className="stars" aria-label="Your rating">{[1,2,3,4,5].map((star) => <button key={star} className={star <= rating ? "active" : ""} onClick={() => onRating(star === rating ? 0 : star)} aria-label={star === rating ? "Clear rating" : `${star} stars`}>★</button>)}{rating > 0 && <button className="clear-rating" onClick={() => onRating(0)}>Clear</button>}</div></div><button className={favorite ? "favorite active" : "favorite"} onClick={onFavorite}>{favorite ? "♥ Favorite" : "♡ Add favorite"}</button><label className="watched-date"><span>First watched</span><input type="date" max={localDateKey()} value={watchDates[0]?.slice(0, 10) || ""} onChange={(event) => onWatchedDate(event.target.value)} /><small>{watchDates.length > 1 ? `${watchDates.length} total viewings · latest ${displayWatchedDate(watchDates.at(-1)!)}` : "Selecting a date also marks this entry complete."}</small></label>{completed && <div className="rewatch-control"><span>Watch again</span><div><input type="date" max={localDateKey()} value={rewatchDate} onChange={(event) => setRewatchDate(event.target.value)} /><button onClick={() => rewatchDate && onRewatch(rewatchDate)}>Add viewing</button></div>{watchDates.length > 1 && <small>{watchDates.slice(1).map(displayWatchedDate).join(" · ")}</small>}</div>}<label><span>Private notes</span><textarea value={note} onChange={(event) => onNote(event.target.value)} placeholder="Add thoughts, callbacks, or rewatch notes…" /></label><small>Saved locally, included in backups, and synced when you connect Google.</small></section>
         <div className="drawer-actions"><button className={completed ? "drawer-complete done" : "drawer-complete"} onClick={onToggle}><Icon name="check" />{completed ? "Completed" : "Mark complete"}</button><a href={trailerUrl(entry.collection)} target="_blank" rel="noreferrer"><Icon name="play" />Official trailer</a></div>
       </div>
     </aside>
@@ -285,6 +341,10 @@ export default function Home() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [deletedProfiles, setDeletedProfiles] = useState<Record<string, string>>({});
+  const [user, setUser] = useState<User | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("local");
+  const [lastSyncedAt, setLastSyncedAt] = useState("");
   const [phaseFilter, setPhaseFilter] = useState("");
   const [franchiseFilter, setFranchiseFilter] = useState("");
   const [divisionFilter, setDivisionFilter] = useState("");
@@ -296,6 +356,12 @@ export default function Home() {
   const [installPrompt, setInstallPrompt] = useState<(Event & { prompt: () => Promise<void> }) | null>(null);
   const [today, setToday] = useState<Date>();
   const importRef = useRef<HTMLInputElement>(null);
+  const localArchiveRef = useRef<CloudArchive | null>(null);
+  const syncReadyRef = useRef(false);
+  const migrationHandledRef = useRef("");
+  const lastWrittenAtRef = useRef("");
+  const syncedFingerprintRef = useRef("");
+  const remoteApplyingUntilRef = useRef(0);
   const closeDetails = useCallback(() => setSelectedEntry(undefined), []);
 
   useEffect(() => {
@@ -314,6 +380,7 @@ export default function Home() {
       setProfiles(savedProfiles); setActiveProfileId(active.id); setCompleted(new Set(active.completed)); setHistory(active.history); setActivity(active.activity || []); setTheme(active.theme || "infinity"); setWatchOrder(active.order); setScope(active.scope); setRatings(active.ratings || {}); setFavorites(new Set(active.favorites || [])); setNotes(active.notes || {});
       setHideSpoilers(localStorage.getItem(SPOILER_KEY) !== "false");
       setHideWatched(localStorage.getItem(HIDE_WATCHED_KEY) === "true");
+      try { setDeletedProfiles(JSON.parse(localStorage.getItem(DELETED_PROFILES_KEY) || "{}")); } catch { setDeletedProfiles({}); }
       setToday(new Date());
       setBulkWatchDate(localDateKey());
       setHydrated(true);
@@ -328,9 +395,83 @@ export default function Home() {
     }));
     localStorage.setItem(ACTIVE_PROFILE_KEY, activeProfileId);
   }, [activeProfileId, activity, completed, favorites, history, hydrated, notes, ratings, scope, theme, watchOrder]);
+  useEffect(() => { if (hydrated) localStorage.setItem(DELETED_PROFILES_KEY, JSON.stringify(deletedProfiles)); }, [deletedProfiles, hydrated]);
   useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => { if (hydrated) localStorage.setItem(SPOILER_KEY, String(hideSpoilers)); }, [hideSpoilers, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem(HIDE_WATCHED_KEY, String(hideWatched)); }, [hideWatched, hydrated]);
+  useEffect(() => {
+    if (!hydrated) return;
+    const currentProfiles = profiles.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, activity, theme, ratings, favorites: [...favorites], notes } : profile);
+    const archive: CloudArchive = { schemaVersion: 4, appVersion: APP_VERSION, updatedAt: new Date().toISOString(), activeProfileId, profiles: currentProfiles, deletedProfiles, preferences: { hideSpoilers, hideWatched } };
+    localArchiveRef.current = archive;
+    if (!user || !syncReadyRef.current || Date.now() < remoteApplyingUntilRef.current) return;
+    if (!navigator.onLine) { queueMicrotask(() => setSyncStatus("offline")); return; }
+    queueMicrotask(() => setSyncStatus("syncing"));
+    const timer = window.setTimeout(async () => {
+      const next = { ...localArchiveRef.current!, updatedAt: new Date().toISOString() };
+      try {
+        lastWrittenAtRef.current = next.updatedAt;
+        await setDoc(archiveDocument(user), next);
+        syncedFingerprintRef.current = archiveFingerprint(next);
+        setLastSyncedAt(next.updatedAt); setSyncStatus("synced");
+      } catch { setSyncStatus(navigator.onLine ? "error" : "offline"); }
+    }, 1100);
+    return () => window.clearTimeout(timer);
+  }, [activeProfileId, activity, completed, deletedProfiles, favorites, hideSpoilers, hideWatched, history, hydrated, notes, profiles, ratings, scope, theme, user, watchOrder]);
+  useEffect(() => {
+    if (!hydrated) return;
+    let unsubscribeCloud: () => void = () => {};
+    const unsubscribeAuth = onAuthStateChanged(auth, (nextUser) => {
+      unsubscribeCloud(); setUser(nextUser); syncReadyRef.current = false;
+      if (!nextUser) { migrationHandledRef.current = ""; setSyncStatus("local"); return; }
+      setSyncStatus("connecting");
+      const reference = archiveDocument(nextUser);
+      unsubscribeCloud = onSnapshot(reference, async (snapshot) => {
+        const local = localArchiveRef.current;
+        if (!local) return;
+        if (!snapshot.exists()) {
+          const initial = { ...local, updatedAt: new Date().toISOString() };
+          lastWrittenAtRef.current = initial.updatedAt;
+          try { await setDoc(reference, initial); syncedFingerprintRef.current = archiveFingerprint(initial); syncReadyRef.current = true; setLastSyncedAt(initial.updatedAt); setSyncStatus("synced"); }
+          catch { setSyncStatus(navigator.onLine ? "error" : "offline"); }
+          return;
+        }
+        const cloud = snapshot.data() as CloudArchive;
+        if (cloud.updatedAt === lastWrittenAtRef.current) { syncedFingerprintRef.current = archiveFingerprint(cloud); syncReadyRef.current = true; setLastSyncedAt(cloud.updatedAt); setSyncStatus("synced"); return; }
+        if (migrationHandledRef.current !== nextUser.uid) {
+          migrationHandledRef.current = nextUser.uid;
+          const hasLocalProgress = local.profiles.length > 1 || local.profiles.some((profile) => profile.completed.length || profile.history.length || Object.keys(profile.ratings || {}).length || profile.favorites.length || Object.keys(profile.notes || {}).length);
+          let selected = cloud;
+          if (hasLocalProgress && JSON.stringify(local.profiles) !== JSON.stringify(cloud.profiles)) {
+            const merge = confirm("Cloud profiles were found for this Google account.\n\nChoose OK to safely merge them with the profiles on this device. Choose Cancel for replacement options.");
+            if (merge) selected = mergeArchives(local, cloud);
+            else {
+              const useCloud = confirm("Choose OK to replace this device with the cloud archive.\n\nChoose Cancel to keep this device's archive and replace the cloud copy. An automatic browser backup remains available until local storage is cleared.");
+              selected = useCloud ? cloud : { ...local, updatedAt: new Date().toISOString() };
+            }
+          }
+          if (selected !== cloud) {
+            lastWrittenAtRef.current = selected.updatedAt;
+            await setDoc(reference, selected);
+          }
+          syncedFingerprintRef.current = archiveFingerprint(selected); applyCloudArchive(selected); syncReadyRef.current = true; setLastSyncedAt(selected.updatedAt); setSyncStatus("synced");
+          return;
+        }
+        if (cloud.updatedAt) {
+          const hasUnsyncedLocalChanges = archiveFingerprint(local) !== syncedFingerprintRef.current;
+          const selected = hasUnsyncedLocalChanges ? mergeArchives(local, cloud) : cloud;
+          if (hasUnsyncedLocalChanges) { lastWrittenAtRef.current = selected.updatedAt; await setDoc(reference, selected); }
+          syncedFingerprintRef.current = archiveFingerprint(selected); applyCloudArchive(selected); setLastSyncedAt(selected.updatedAt); setSyncStatus("synced");
+        }
+      }, () => setSyncStatus(navigator.onLine ? "error" : "offline"));
+    });
+    const online = () => { if (auth.currentUser) { setSyncStatus("connecting"); void syncNow(); } };
+    const offline = () => auth.currentUser && setSyncStatus("offline");
+    window.addEventListener("online", online); window.addEventListener("offline", offline);
+    return () => { unsubscribeCloud(); unsubscribeAuth(); window.removeEventListener("online", online); window.removeEventListener("offline", offline); };
+  // Authentication is subscribed once after local data has hydrated. Live values are read from localArchiveRef.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(undefined), 4500); return () => window.clearTimeout(timer); }, [toast]);
   useEffect(() => {
     if ("serviceWorker" in navigator) navigator.serviceWorker.register("./service-worker.js").catch(() => undefined);
@@ -368,6 +509,45 @@ export default function Home() {
     return groups;
   }, [filtered]);
 
+  function applyCloudArchive(archive: CloudArchive) {
+    if (!archive.profiles?.length) return;
+    remoteApplyingUntilRef.current = Date.now() + 1800;
+    const active = archive.profiles.find((profile) => profile.id === archive.activeProfileId) || archive.profiles[0];
+    setProfiles(archive.profiles); setDeletedProfiles(archive.deletedProfiles || {}); setActiveProfileId(active.id);
+    setCompleted(new Set(active.completed || [])); setHistory(active.history || []); setActivity(active.activity || []); setTheme(active.theme || "infinity");
+    setWatchOrder(active.order || "release"); setScope(active.scope || "completionist"); setRatings(active.ratings || {}); setFavorites(new Set(active.favorites || [])); setNotes(active.notes || {});
+    setHideSpoilers(archive.preferences?.hideSpoilers !== false); setHideWatched(archive.preferences?.hideWatched === true);
+  }
+
+  async function connectGoogle() {
+    setSyncStatus("connecting");
+    try { await signInWithGoogle(); }
+    catch (error) {
+      setSyncStatus("error");
+      const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+      if (code !== "auth/popup-closed-by-user") alert("Google sign-in could not be completed. Confirm cinematicarchiveshq.github.io is listed in Firebase Authorized domains, then try again.");
+    }
+  }
+
+  async function syncNow() {
+    const currentUser = user || auth.currentUser;
+    if (!currentUser || !localArchiveRef.current) return;
+    setSyncStatus(navigator.onLine ? "syncing" : "offline");
+    try {
+      const reference = archiveDocument(currentUser); const snapshot = await getDoc(reference);
+      const local = { ...localArchiveRef.current, updatedAt: new Date().toISOString() };
+      const next = snapshot.exists() ? mergeArchives(local, snapshot.data() as CloudArchive) : local;
+      lastWrittenAtRef.current = next.updatedAt; await setDoc(reference, next); syncedFingerprintRef.current = archiveFingerprint(next); applyCloudArchive(next);
+      setLastSyncedAt(next.updatedAt); setSyncStatus("synced");
+    } catch { setSyncStatus(navigator.onLine ? "error" : "offline"); }
+  }
+
+  async function removeCloudArchive() {
+    if (!user || !confirm("Permanently delete the Infinity Archive profiles stored in this Google account? The profiles currently saved on this device will remain local.")) return;
+    try { await deleteDoc(archiveDocument(user)); await signOutGoogle(); setSyncStatus("local"); }
+    catch { alert("The cloud archive could not be deleted. Please try again while online."); }
+  }
+
   function loadProfile(profile: Profile) {
     setActiveProfileId(profile.id); setCompleted(new Set(profile.completed)); setHistory(profile.history); setActivity(profile.activity || []); setTheme(profile.theme || "infinity"); setWatchOrder(profile.order); setScope(profile.scope); setRatings(profile.ratings || {}); setFavorites(new Set(profile.favorites || [])); setNotes(profile.notes || {}); setView("archive");
   }
@@ -379,7 +559,7 @@ export default function Home() {
   function deleteProfile(id: string) {
     if (profiles.length === 1) return alert("Keep at least one watch-through profile.");
     if (!confirm("Delete this watch-through and all of its local progress?")) return;
-    const next = profiles.filter((profile) => profile.id !== id); setProfiles(next); if (id === activeProfileId) loadProfile(next[0]);
+    const next = profiles.filter((profile) => profile.id !== id); setDeletedProfiles((current) => ({ ...current, [id]: new Date().toISOString() })); setProfiles(next); if (id === activeProfileId) loadProfile(next[0]);
   }
   function recordActivity(id: string, type: ActivityEvent["type"]) {
     setActivity((current) => [...current, { id, type, at: new Date().toISOString() }].slice(-250));
@@ -456,12 +636,12 @@ export default function Home() {
   }
   function exportProgress() {
     const currentProfiles = profiles.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, activity, theme, ratings, favorites: [...favorites], notes } : profile);
-    const blob = new Blob([JSON.stringify({ version: 3, appVersion: APP_VERSION, exportedAt: new Date().toISOString(), activeProfileId, profiles: currentProfiles }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ version: 4, appVersion: APP_VERSION, exportedAt: new Date().toISOString(), activeProfileId, profiles: currentProfiles, deletedProfiles, preferences: { hideSpoilers, hideWatched } }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "infinity-archive-progress.json"; link.click(); URL.revokeObjectURL(url);
   }
   async function importProgress(file?: File) {
     if (!file) return;
-    try { const data = JSON.parse(await file.text()); if (Array.isArray(data.profiles)) { setProfiles(data.profiles); loadProfile(data.profiles.find((profile: Profile) => profile.id === data.activeProfileId) || data.profiles[0]); } else if (Array.isArray(data.completed)) setCompleted(new Set(data.completed)); else throw new Error(); } catch { alert("That file is not a valid Infinity Archive backup."); }
+    try { const data = JSON.parse(await file.text()); if (Array.isArray(data.profiles) && data.profiles.length) { setProfiles(data.profiles); setDeletedProfiles(data.deletedProfiles || {}); if (data.preferences) { setHideSpoilers(data.preferences.hideSpoilers !== false); setHideWatched(data.preferences.hideWatched === true); } loadProfile(data.profiles.find((profile: Profile) => profile.id === data.activeProfileId) || data.profiles[0]); } else if (Array.isArray(data.completed)) setCompleted(new Set(data.completed)); else throw new Error(); } catch { alert("That file is not a valid Infinity Archive backup."); }
   }
 
   async function shareProgress() {
@@ -643,7 +823,28 @@ export default function Home() {
       <div className="page-heading"><p className="eyebrow">Release-order journey</p><h1>Six phases. One continuous archive.</h1><p>A high-level map of your progress without losing the precise release sequence.</p></div>
       <div className="timeline-track">{phaseStats.map((stat, index) => <article key={stat.phase}><div className="timeline-node"><span>{index + 1}</span></div><div><small>Era {String(index + 1).padStart(2, "0")}</small><h2>{stat.phase}</h2><p>{stat.total} items · {Math.round(stat.percent)}% complete</p><div className="phase-line"><i style={{ width: `${stat.percent}%` }} /></div></div></article>)}</div>
     </section>}
-    {view === "settings" && <section className="inner-page settings-page"><div className="page-heading"><p className="eyebrow">Local control center</p><h1>Your archive, your rules.</h1><p>Everything below stays on this device unless you export a backup.</p></div><div className="settings-grid"><article><div className="panel-heading"><h2>Watch-through profiles</h2><button onClick={createProfile}>New profile</button></div><p>Run a fresh chronological rewatch without erasing your original release-order journey.</p>{profiles.map((profile) => <div className={`profile-row ${profile.id === activeProfileId ? "active" : ""}`} key={profile.id}><button onClick={() => loadProfile(profile)}><strong>{profile.name}</strong><span>{profile.completed.length} completed · {profile.order === "release" ? "Release order" : "MCU timeline"}</span></button><button onClick={() => deleteProfile(profile.id)} aria-label={`Delete ${profile.name}`}>×</button></div>)}</article><article><div className="panel-heading"><h2>Data management</h2></div><p>Backup every profile, viewing date, rating, favorite, note, theme, and activity record.</p><div className="settings-actions"><button onClick={exportProgress}>Export full backup</button><button onClick={() => importRef.current?.click()}>Restore backup</button><button onClick={shareProgress}>Download Archive Passport</button><button className="danger" onClick={() => { if (confirm("Reset only this profile?")) { setCompleted(new Set()); setHistory([]); setActivity([]); setRatings({}); setFavorites(new Set()); setNotes({}); } }}>Reset active profile</button></div></article><article><div className="panel-heading"><h2>Visual theme</h2></div><p>Choose a profile-specific title-page treatment.</p><div className="theme-grid">{themes.map((option) => <button key={option.id} className={theme === option.id ? `theme-${option.id} active` : `theme-${option.id}`} onClick={() => setTheme(option.id)}><i />{option.name}</button>)}</div></article><article><div className="panel-heading"><h2>Catalog update center</h2><span>Current</span></div><dl><div><dt>App version</dt><dd>{APP_VERSION}</dd></div><div><dt>Metadata version</dt><dd>{METADATA_VERSION}</dd></div><div><dt>Items indexed</dt><dd>{entries.length}</dd></div><div><dt>Upcoming monitored</dt><dd>{upcomingProjects.length}</dd></div></dl><p className="update-note"><strong>Latest catalog release</strong> No unresolved catalog migrations. Upcoming projects remain staged separately until their release date and a reviewed catalog update.</p></article><article className="whats-new"><div className="panel-heading"><h2>What’s new in v14</h2></div><p>Rewatch history, full spoiler-safe mode, metadata and notes search, Favorites filtering, dedicated History and calendar views, recent activity, five themes, catalog status, phase recaps, and the expanded Archive Passport.</p><p>MCU On This Day facts are reserved for the research-backed fact catalog update.</p></article></div></section>}
+    {view === "settings" && <section className="inner-page settings-page">
+      <div className="page-heading"><p className="eyebrow">Archive control center</p><h1>Your archive, everywhere.</h1><p>Keep using the archive locally, or connect Google to securely sync your profiles between devices.</p></div>
+      <div className="settings-grid">
+        <article className="cloud-sync-card">
+          <div className="panel-heading"><h2>Google profile sync</h2><span className={`sync-badge ${syncStatus}`}>{syncStatus === "local" ? "Local only" : syncStatus}</span></div>
+          {user ? <>
+            <div className="google-account">{user.photoURL && <img src={user.photoURL} alt="" referrerPolicy="no-referrer" />}<span><strong>{user.displayName || "Google account"}</strong><small>{user.email}</small></span></div>
+            <p>Your profiles save locally first and sync automatically. Watched dates are merged safely when devices reconnect.</p>
+            {lastSyncedAt && <p className="last-sync">Last synced {new Date(lastSyncedAt).toLocaleString()}</p>}
+            <div className="settings-actions"><button onClick={syncNow}>Sync now</button><button onClick={() => signOutGoogle()}>Sign out</button><button className="danger" onClick={removeCloudArchive}>Delete cloud archive</button></div>
+          </> : <>
+            <p>Google sign-in is optional. Connecting uploads your current local profiles and makes them available on your other signed-in devices.</p>
+            <button className="google-signin" onClick={connectGoogle}>Continue with Google</button>
+          </>}
+        </article>
+        <article><div className="panel-heading"><h2>Watch-through profiles</h2><button onClick={createProfile}>New profile</button></div><p>Run a fresh chronological rewatch without erasing your original release-order journey.</p>{profiles.map((profile) => <div className={`profile-row ${profile.id === activeProfileId ? "active" : ""}`} key={profile.id}><button onClick={() => loadProfile(profile)}><strong>{profile.name}</strong><span>{profile.completed.length} completed · {profile.order === "release" ? "Release order" : "MCU timeline"}</span></button><button onClick={() => deleteProfile(profile.id)} aria-label={`Delete ${profile.name}`}>×</button></div>)}</article>
+        <article><div className="panel-heading"><h2>Data management</h2></div><p>Backup every profile, viewing date, rating, favorite, note, theme, and activity record.</p><div className="settings-actions"><button onClick={exportProgress}>Export full backup</button><button onClick={() => importRef.current?.click()}>Restore backup</button><button onClick={shareProgress}>Download Archive Passport</button><button className="danger" onClick={() => { if (confirm("Reset only this profile?")) { setCompleted(new Set()); setHistory([]); setActivity([]); setRatings({}); setFavorites(new Set()); setNotes({}); } }}>Reset active profile</button></div></article>
+        <article><div className="panel-heading"><h2>Visual theme</h2></div><p>Choose a profile-specific title-page treatment.</p><div className="theme-grid">{themes.map((option) => <button key={option.id} className={theme === option.id ? `theme-${option.id} active` : `theme-${option.id}`} onClick={() => setTheme(option.id)}><i />{option.name}</button>)}</div></article>
+        <article><div className="panel-heading"><h2>Catalog update center</h2><span>Current</span></div><dl><div><dt>App version</dt><dd>{APP_VERSION}</dd></div><div><dt>Metadata version</dt><dd>{METADATA_VERSION}</dd></div><div><dt>Items indexed</dt><dd>{entries.length}</dd></div><div><dt>Upcoming monitored</dt><dd>{upcomingProjects.length}</dd></div></dl><p className="update-note"><strong>Latest catalog release</strong> No unresolved catalog migrations. Upcoming projects remain staged separately until their release date and a reviewed catalog update.</p></article>
+        <article className="whats-new"><div className="panel-heading"><h2>What’s new in v14.2</h2></div><p>Optional Google sign-in, local-first cross-device profile sync, safe first-login migration choices, automatic conflict merging, live sync status, manual sync, and cloud-data controls.</p><p>MCU On This Day facts remain reserved for the research-backed fact catalog update.</p></article>
+      </div>
+    </section>}
     <DetailDrawer key={selectedEntry?.id || "closed"} entry={selectedEntry} completed={!!selectedEntry && completed.has(selectedEntry.id)} hideSpoilers={hideSpoilers} rating={selectedEntry ? ratings[selectedEntry.id] || 0 : 0} favorite={!!selectedEntry && favorites.has(selectedEntry.id)} note={selectedEntry ? notes[selectedEntry.id] || "" : ""} watchDates={selectedEntry ? (historyByItem.get(selectedEntry.id) || []).map((event) => event.at) : []} onClose={closeDetails} onToggle={() => selectedEntry && toggleEntry(selectedEntry.id, selectedEntry.episode ? `${selectedEntry.title} ${selectedEntry.detail}` : selectedEntry.title)} onRating={(value) => selectedEntry && (setRatings((current) => { const next = { ...current }; if (value) next[selectedEntry.id] = value; else delete next[selectedEntry.id]; return next; }), recordActivity(selectedEntry.id, "edited"))} onFavorite={() => selectedEntry && (setFavorites((current) => { const next = new Set(current); if (next.has(selectedEntry.id)) next.delete(selectedEntry.id); else next.add(selectedEntry.id); return next; }), recordActivity(selectedEntry.id, "edited"))} onNote={(value) => selectedEntry && (setNotes((current) => ({ ...current, [selectedEntry.id]: value })), recordActivity(selectedEntry.id, "edited"))} onWatchedDate={(value) => selectedEntry && setEntryWatchedDate(selectedEntry.id, value)} onRewatch={(value) => selectedEntry && addRewatch(selectedEntry.id, value)} />
     <UpcomingDrawer key={selectedUpcoming?.title || "upcoming-closed"} project={selectedUpcoming} onClose={() => setSelectedUpcoming(undefined)} />
     {achievementToast && <div className="achievement-splash" role="status"><button onClick={() => setAchievementToast(undefined)} aria-label="Dismiss achievement">×</button><div className="achievement-badge"><span>{achievementToast.icon}</span></div><p>Achievement unlocked</p><h2>{achievementToast.name}</h2><div>{achievementToast.description}</div></div>}
