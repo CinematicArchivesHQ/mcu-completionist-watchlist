@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { entries, sourceCount, totalRuntime, type WatchEntry } from "./data";
 import { episodeMetadata } from "./episode-metadata";
 import { episodeMetadataOverrides, metadataKey, metadataOverrides, normalizeGenres } from "./metadata-overrides";
-import { achievementData, divisionFor, franchiseFor, infinityStones, orderEntries, presetMatches, upcomingProjects, yearFor, type Profile, type UpcomingProject, type WatchOrder } from "./catalog";
+import { achievementData, divisionFor, franchiseFor, infinityStones, orderEntries, presetMatches, searchCreditsFor, upcomingProjects, yearFor, type Profile, type UpcomingProject, type WatchOrder } from "./catalog";
 
 type View = "archive" | "analytics" | "timeline" | "history" | "settings";
 type Filter = "all" | "movie" | "episode" | "special" | "short" | "remaining" | "favorites";
@@ -18,8 +18,8 @@ const SPOILER_KEY = "infinity-archive-hide-spoilers";
 const HIDE_WATCHED_KEY = "infinity-archive-hide-watched";
 const PROFILES_KEY = "infinity-archive-profiles-v1";
 const ACTIVE_PROFILE_KEY = "infinity-archive-active-profile-v1";
-const APP_VERSION = "2.3.0";
-const METADATA_VERSION = "2026.07.21-v14";
+const APP_VERSION = "2.3.1";
+const METADATA_VERSION = "2026.07.21-v14.1";
 const ACHIEVEMENTS_SEEN_KEY = "infinity-archive-achievements-seen-v1";
 const posterCache = new Map<string, string | null>();
 type MediaDetails = { episodeTitle?: string; releaseDate?: string; genres?: string[]; cast?: string[]; description?: string };
@@ -359,7 +359,7 @@ export default function Home() {
     if (!presetMatches(entry, preset)) return false;
     const override = episodeMetadataOverrides[metadataKey(entry.collection, entry.season, entry.episode)] || metadataOverrides[entry.collection] || {};
     const episode = episodeMetadata[metadataKey(entry.collection, entry.season, entry.episode)] || {};
-    return `${entry.title} ${entry.collection} ${entry.detail} ${entry.phase} ${franchiseFor(entry)} ${divisionFor(entry)} ${(override.cast || episode.cast || []).join(" ")} ${(override.genres || episode.genres || []).join(" ")} ${override.title || episode.episodeTitle || ""} ${override.description || episode.description || ""} ${notes[entry.id] || ""}`.toLowerCase().includes(query.toLowerCase());
+    return `${entry.title} ${entry.collection} ${entry.detail} ${entry.phase} ${franchiseFor(entry)} ${divisionFor(entry)} ${searchCreditsFor(entry)} ${(override.cast || episode.cast || []).join(" ")} ${(override.genres || episode.genres || []).join(" ")} ${override.title || episode.episodeTitle || ""} ${override.description || episode.description || ""} ${notes[entry.id] || ""}`.toLowerCase().includes(query.trim().toLowerCase());
   }), [scopedEntries, filter, query, completed, favorites, hideWatched, notes, phaseFilter, franchiseFilter, divisionFilter, yearFilter, preset]);
 
   const collections = useMemo(() => {

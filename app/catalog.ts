@@ -115,6 +115,40 @@ export function yearFor(entry: WatchEntry) {
   const phaseYear: Record<string, number> = { "Phase One": 2008, "Phase Two": 2013, "Phase Three": 2016, "Phase Four": 2021, "Phase Five": 2023, "Phase Six": 2025 };
   return phaseYear[entry.phase] || 2008;
 }
+
+// Search credits must be available before a detail drawer is opened. Film
+// metadata is enriched on demand, so relying on that cache made actor searches
+// work mostly for episodes. These durable associations keep the archive search
+// useful on a fresh install and also include common character-name queries.
+const creditRules: Array<[RegExp, string]> = [
+  [/^(Iron Man|Iron Man 2|Iron Man 3|The Incredible Hulk|The Avengers|Avengers: Age of Ultron|Captain America: Civil War|Spider-Man: Homecoming|Avengers: Infinity War|Avengers: Endgame)$/, "Robert Downey Jr Tony Stark Iron Man"],
+  [/^(Captain America: The First Avenger|The Avengers|Captain America: The Winter Soldier|Avengers: Age of Ultron|Captain America: Civil War|Avengers: Infinity War|Avengers: Endgame)$/, "Chris Evans Steve Rogers Captain America"],
+  [/^(Thor|The Avengers|Thor: The Dark World|Avengers: Age of Ultron|Thor: Ragnarok|Avengers: Infinity War|Avengers: Endgame|Thor: Love and Thunder)$/, "Chris Hemsworth Thor"],
+  [/^(The Avengers|Captain America: The Winter Soldier|Avengers: Age of Ultron|Captain America: Civil War|Black Widow|Avengers: Infinity War|Avengers: Endgame)$/, "Scarlett Johansson Natasha Romanoff Black Widow"],
+  [/^(The Avengers|Avengers: Age of Ultron|Captain America: Civil War|Thor: Ragnarok|Avengers: Infinity War|Avengers: Endgame|Hawkeye)$/, "Mark Ruffalo Bruce Banner Hulk Jeremy Renner Clint Barton Hawkeye"],
+  [/^(Guardians of the Galaxy|Guardians of the Galaxy, Vol. 2|Avengers: Infinity War|Avengers: Endgame|Thor: Love and Thunder|The Guardians of the Galaxy Holiday Special|Guardians of the Galaxy, Vol. 3)$/, "Chris Pratt Peter Quill Star-Lord Zoe Saldana Gamora Dave Bautista Drax Bradley Cooper Rocket Vin Diesel Groot"],
+  [/^(Ant-Man|Captain America: Civil War|Ant-Man & the Wasp|Avengers: Endgame|Ant-Man & the Wasp: Quantumania)$/, "Paul Rudd Scott Lang Ant-Man Evangeline Lilly Hope van Dyne Wasp"],
+  [/^(Doctor Strange|Thor: Ragnarok|Avengers: Infinity War|Avengers: Endgame|Spider-Man: No Way Home|Doctor Strange in the Multiverse of Madness)$/, "Benedict Cumberbatch Stephen Strange Doctor Strange Benedict Wong Wong"],
+  [/^(Black Panther|Captain America: Civil War|Avengers: Infinity War|Avengers: Endgame|Black Panther: Wakanda Forever)$/, "Chadwick Boseman T'Challa Black Panther Letitia Wright Shuri"],
+  [/^(Captain Marvel|Avengers: Endgame|Shang-Chi and the Legend of the Ten Rings|Ms. Marvel|The Marvels)$/, "Brie Larson Carol Danvers Captain Marvel"],
+  [/^(Spider-Man: Homecoming|Avengers: Infinity War|Avengers: Endgame|Peter's To-Do List|Spider-Man: Far From Home|Spider-Man: No Way Home)$/, "Tom Holland Peter Parker Spider-Man Zendaya MJ"],
+  [/^(WandaVision|Avengers: Age of Ultron|Captain America: Civil War|Avengers: Infinity War|Avengers: Endgame|Doctor Strange in the Multiverse of Madness)$/, "Elizabeth Olsen Wanda Maximoff Scarlet Witch Paul Bettany Vision"],
+  [/^(Loki|Thor|The Avengers|Thor: The Dark World|Thor: Ragnarok|Avengers: Infinity War|Avengers: Endgame)$/, "Tom Hiddleston Loki"],
+  [/^Shang-Chi and the Legend of the Ten Rings$/, "Simu Liu Shang-Chi Awkwafina Katy Tony Leung Wenwu Destin Daniel Cretton"],
+  [/^Eternals$/, "Gemma Chan Sersi Richard Madden Ikaris Angelina Jolie Thena Chloe Zhao"],
+  [/^Black Widow$/, "Florence Pugh Yelena Belova David Harbour Alexei Shostakov Red Guardian Cate Shortland"],
+  [/^Deadpool & Wolverine$/, "Ryan Reynolds Wade Wilson Deadpool Hugh Jackman Logan Wolverine Shawn Levy"],
+  [/^The Fantastic Four: First Steps$/, "Pedro Pascal Reed Richards Mister Fantastic Vanessa Kirby Sue Storm Joseph Quinn Johnny Storm Ebon Moss-Bachrach Ben Grimm Matt Shakman"],
+  [/^Captain America: Brave New World$/, "Anthony Mackie Sam Wilson Captain America Harrison Ford Thaddeus Ross Red Hulk Julius Onah"],
+  [/^Thunderbolts\*$/, "Florence Pugh Yelena Belova Sebastian Stan Bucky Barnes Winter Soldier David Harbour Red Guardian Jake Schreier"],
+  [/^Iron Man$/, "Jon Favreau director Gwyneth Paltrow Pepper Potts Jeff Bridges Obadiah Stane"],
+  [/^Iron Man 2$/, "Jon Favreau director Gwyneth Paltrow Pepper Potts Don Cheadle James Rhodes War Machine Mickey Rourke Ivan Vanko"],
+  [/^Iron Man 3$/, "Shane Black director Gwyneth Paltrow Pepper Potts Don Cheadle James Rhodes War Machine Guy Pearce Aldrich Killian"],
+];
+
+export function searchCreditsFor(entry: WatchEntry) {
+  return creditRules.filter(([rule]) => rule.test(entry.collection)).map(([, terms]) => terms).join(" ");
+}
 export function presetMatches(entry: WatchEntry, preset: string) {
   if (!preset) return true;
   if (preset === "infinity") return ["Phase One", "Phase Two", "Phase Three"].includes(entry.phase);
