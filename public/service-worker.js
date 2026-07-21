@@ -1,4 +1,4 @@
-const CACHE = "infinity-archive-v7";
+const CACHE = "infinity-archive-v8";
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.add("./"))));
 self.addEventListener("activate", (event) => event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))));
 self.addEventListener("fetch", (event) => {
