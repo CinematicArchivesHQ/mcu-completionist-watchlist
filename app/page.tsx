@@ -6,8 +6,8 @@ import { episodeMetadata } from "./episode-metadata";
 import { episodeMetadataOverrides, metadataKey, metadataOverrides, normalizeGenres } from "./metadata-overrides";
 import { achievementData, divisionFor, franchiseFor, infinityStones, orderEntries, presetMatches, upcomingProjects, yearFor, type Profile, type UpcomingProject, type WatchOrder } from "./catalog";
 
-type View = "archive" | "analytics" | "timeline" | "settings";
-type Filter = "all" | "movie" | "episode" | "special" | "short" | "remaining";
+type View = "archive" | "analytics" | "timeline" | "history" | "settings";
+type Filter = "all" | "movie" | "episode" | "special" | "short" | "remaining" | "favorites";
 type Scope = "completionist" | "official";
 
 const STORAGE_KEY = "infinity-archive-progress-v1";
@@ -18,8 +18,8 @@ const SPOILER_KEY = "infinity-archive-hide-spoilers";
 const HIDE_WATCHED_KEY = "infinity-archive-hide-watched";
 const PROFILES_KEY = "infinity-archive-profiles-v1";
 const ACTIVE_PROFILE_KEY = "infinity-archive-active-profile-v1";
-const APP_VERSION = "2.2.0";
-const METADATA_VERSION = "2026.07.21";
+const APP_VERSION = "2.3.0";
+const METADATA_VERSION = "2026.07.21-v14";
 const ACHIEVEMENTS_SEEN_KEY = "infinity-archive-achievements-seen-v1";
 const posterCache = new Map<string, string | null>();
 type MediaDetails = { episodeTitle?: string; releaseDate?: string; genres?: string[]; cast?: string[]; description?: string };
@@ -79,6 +79,14 @@ function localDateKey(date = new Date()) {
 
 function watchedTimestamp(date: string) { return `${date}T12:00:00`; }
 function displayWatchedDate(value: string) { return new Date(value.length === 10 ? watchedTimestamp(value) : value).toLocaleDateString(); }
+
+const themes = [
+  { id: "infinity", name: "Infinity Archive Gold" }, { id: "tva", name: "TVA Amber" },
+  { id: "wakanda", name: "Wakandan Violet" }, { id: "stark", name: "Stark Interface Blue" },
+  { id: "scarlet", name: "Scarlet Cosmic Red" },
+] as const;
+type Theme = typeof themes[number]["id"];
+type ActivityEvent = { id: string; at: string; type: "viewed" | "edited" };
 
 async function wikidataLabels(ids: string[]) {
   if (!ids.length) return [];
@@ -209,8 +217,9 @@ function ProgressRing({ value }: { value: number }) {
   return <div className="progress-ring" style={{ "--progress": `${value * 3.6}deg` } as React.CSSProperties}><div><strong>{Math.round(value)}%</strong><span>complete</span></div></div>;
 }
 
-function DetailDrawer({ entry, completed, hideSpoilers, rating, favorite, note, watchedDate, onClose, onToggle, onRating, onFavorite, onNote, onWatchedDate }: { entry?: WatchEntry; completed: boolean; hideSpoilers: boolean; rating: number; favorite: boolean; note: string; watchedDate: string; onClose: () => void; onToggle: () => void; onRating: (value: number) => void; onFavorite: () => void; onNote: (value: string) => void; onWatchedDate: (value: string) => void }) {
+function DetailDrawer({ entry, completed, hideSpoilers, rating, favorite, note, watchDates, onClose, onToggle, onRating, onFavorite, onNote, onWatchedDate, onRewatch }: { entry?: WatchEntry; completed: boolean; hideSpoilers: boolean; rating: number; favorite: boolean; note: string; watchDates: string[]; onClose: () => void; onToggle: () => void; onRating: (value: number) => void; onFavorite: () => void; onNote: (value: string) => void; onWatchedDate: (value: string) => void; onRewatch: (value: string) => void }) {
   const { details, loading } = useMediaDetails(entry);
+  const [rewatchDate, setRewatchDate] = useState(localDateKey());
   useEffect(() => {
     if (!entry) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -218,7 +227,7 @@ function DetailDrawer({ entry, completed, hideSpoilers, rating, favorite, note, 
     return () => { document.body.classList.remove("drawer-open"); document.removeEventListener("keydown", close); };
   }, [entry, onClose]);
   if (!entry) return null;
-  const concealed = hideSpoilers && entry.kind === "episode" && !completed;
+  const concealed = hideSpoilers && !completed;
   return <div className="drawer-backdrop" onMouseDown={onClose} role="presentation">
     <aside className="detail-drawer" onMouseDown={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-label={`${entry.title} details`}>
       <button className="drawer-close" onClick={onClose} aria-label="Close details">×</button>
@@ -226,12 +235,12 @@ function DetailDrawer({ entry, completed, hideSpoilers, rating, favorite, note, 
       <div className="drawer-content">
         <p className="eyebrow">{entry.phase} · {entry.kind}</p>
         <h2>{entry.title}</h2>
-        {details?.episodeTitle && <h3>“{details.episodeTitle}”</h3>}
+        {details?.episodeTitle && <h3>{concealed ? "Episode title hidden" : `“${details.episodeTitle}”`}</h3>}
         <p className="drawer-meta">{entry.detail} · {displayDate(details?.releaseDate) || "Release date unavailable"} · {entry.runtime} min</p>
         {!!details?.genres?.length && <p className="genre-row">{details.genres.join(" · ")}</p>}
         <div className={`drawer-description ${concealed ? "concealed" : ""}`}>{loading ? "Retrieving archive details…" : concealed ? "Episode description hidden until you complete it." : details?.description || "Detailed information is not available for this entry yet."}</div>
-        {!!details?.cast?.length && <p className="cast-row"><span>Starring</span>{details.cast.join(" · ")}</p>}
-        <section className="personal-record"><div><span>Your rating</span><div className="stars" aria-label="Your rating">{[1,2,3,4,5].map((star) => <button key={star} className={star <= rating ? "active" : ""} onClick={() => onRating(star === rating ? 0 : star)} aria-label={star === rating ? "Clear rating" : `${star} stars`}>★</button>)}{rating > 0 && <button className="clear-rating" onClick={() => onRating(0)}>Clear</button>}</div></div><button className={favorite ? "favorite active" : "favorite"} onClick={onFavorite}>{favorite ? "♥ Favorite" : "♡ Add favorite"}</button><label className="watched-date"><span>Watched on</span><input type="date" max={localDateKey()} value={watchedDate} onChange={(event) => onWatchedDate(event.target.value)} /><small>{watchedDate ? "Changing this date updates streaks and activity." : "Selecting a date also marks this entry complete."}</small></label><label><span>Private notes</span><textarea value={note} onChange={(event) => onNote(event.target.value)} placeholder="Add thoughts, callbacks, or rewatch notes…" /></label><small>Saved only on this device and included in your backup.</small></section>
+        {!!details?.cast?.length && !concealed && <p className="cast-row"><span>Starring</span>{details.cast.join(" · ")}</p>}
+        <section className="personal-record"><div><span>Your rating</span><div className="stars" aria-label="Your rating">{[1,2,3,4,5].map((star) => <button key={star} className={star <= rating ? "active" : ""} onClick={() => onRating(star === rating ? 0 : star)} aria-label={star === rating ? "Clear rating" : `${star} stars`}>★</button>)}{rating > 0 && <button className="clear-rating" onClick={() => onRating(0)}>Clear</button>}</div></div><button className={favorite ? "favorite active" : "favorite"} onClick={onFavorite}>{favorite ? "♥ Favorite" : "♡ Add favorite"}</button><label className="watched-date"><span>First watched</span><input type="date" max={localDateKey()} value={watchDates[0]?.slice(0, 10) || ""} onChange={(event) => onWatchedDate(event.target.value)} /><small>{watchDates.length > 1 ? `${watchDates.length} total viewings · latest ${displayWatchedDate(watchDates.at(-1)!)}` : "Selecting a date also marks this entry complete."}</small></label>{completed && <div className="rewatch-control"><span>Watch again</span><div><input type="date" max={localDateKey()} value={rewatchDate} onChange={(event) => setRewatchDate(event.target.value)} /><button onClick={() => rewatchDate && onRewatch(rewatchDate)}>Add viewing</button></div>{watchDates.length > 1 && <small>{watchDates.slice(1).map(displayWatchedDate).join(" · ")}</small>}</div>}<label><span>Private notes</span><textarea value={note} onChange={(event) => onNote(event.target.value)} placeholder="Add thoughts, callbacks, or rewatch notes…" /></label><small>Saved only on this device and included in your backup.</small></section>
         <div className="drawer-actions"><button className={completed ? "drawer-complete done" : "drawer-complete"} onClick={onToggle}><Icon name="check" />{completed ? "Completed" : "Mark complete"}</button><a href={trailerUrl(entry.collection)} target="_blank" rel="noreferrer"><Icon name="play" />Official trailer</a></div>
       </div>
     </aside>
@@ -268,6 +277,8 @@ export default function Home() {
   const [heroExpanded, setHeroExpanded] = useState(false);
   const [toast, setToast] = useState<{ message: string; ids: string[]; wasComplete: boolean; previous?: string[] }>();
   const [history, setHistory] = useState<Array<{ id: string; at: string }>>([]);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
+  const [theme, setTheme] = useState<Theme>("infinity");
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [activeProfileId, setActiveProfileId] = useState("default");
   const [watchOrder, setWatchOrder] = useState<WatchOrder>("release");
@@ -300,7 +311,7 @@ export default function Home() {
       }
       const preferred = localStorage.getItem(ACTIVE_PROFILE_KEY) || savedProfiles[0].id;
       const active = savedProfiles.find((profile) => profile.id === preferred) || savedProfiles[0];
-      setProfiles(savedProfiles); setActiveProfileId(active.id); setCompleted(new Set(active.completed)); setHistory(active.history); setWatchOrder(active.order); setScope(active.scope); setRatings(active.ratings || {}); setFavorites(new Set(active.favorites || [])); setNotes(active.notes || {});
+      setProfiles(savedProfiles); setActiveProfileId(active.id); setCompleted(new Set(active.completed)); setHistory(active.history); setActivity(active.activity || []); setTheme(active.theme || "infinity"); setWatchOrder(active.order); setScope(active.scope); setRatings(active.ratings || {}); setFavorites(new Set(active.favorites || [])); setNotes(active.notes || {});
       setHideSpoilers(localStorage.getItem(SPOILER_KEY) !== "false");
       setHideWatched(localStorage.getItem(HIDE_WATCHED_KEY) === "true");
       setToday(new Date());
@@ -312,11 +323,12 @@ export default function Home() {
     if (!hydrated) return;
     const now = new Date().toISOString();
     queueMicrotask(() => setProfiles((current) => {
-      const next = current.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, ratings, favorites: [...favorites], notes, updatedAt: now } : profile);
+      const next = current.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, activity, theme, ratings, favorites: [...favorites], notes, updatedAt: now } : profile);
       localStorage.setItem(PROFILES_KEY, JSON.stringify(next)); return next;
     }));
     localStorage.setItem(ACTIVE_PROFILE_KEY, activeProfileId);
-  }, [activeProfileId, completed, favorites, history, hydrated, notes, ratings, scope, watchOrder]);
+  }, [activeProfileId, activity, completed, favorites, history, hydrated, notes, ratings, scope, theme, watchOrder]);
+  useEffect(() => { document.documentElement.dataset.theme = theme; }, [theme]);
   useEffect(() => { if (hydrated) localStorage.setItem(SPOILER_KEY, String(hideSpoilers)); }, [hideSpoilers, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem(HIDE_WATCHED_KEY, String(hideWatched)); }, [hideWatched, hydrated]);
   useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(undefined), 4500); return () => window.clearTimeout(timer); }, [toast]);
@@ -332,20 +344,23 @@ export default function Home() {
   const nextEntry = scopedEntries.find((e) => !completed.has(e.id)) || scopedEntries[0];
   useEffect(() => { queueMicrotask(() => setHeroExpanded(false)); }, [nextEntry?.id]);
   const { details: nextDetails, loading: detailsLoading } = useMediaDetails(nextEntry);
-  const heroConcealed = hideSpoilers && nextEntry?.kind === "episode" && !completed.has(nextEntry.id);
+  const heroConcealed = !!nextEntry && hideSpoilers && !completed.has(nextEntry.id);
   const remainingRuntime = scopedEntries.filter((e) => !completed.has(e.id)).reduce((sum, e) => sum + e.runtime, 0);
 
   const filtered = useMemo(() => scopedEntries.filter((entry) => {
     if (hideWatched && completed.has(entry.id)) return false;
     if (filter === "remaining" && completed.has(entry.id)) return false;
+    if (filter === "favorites" && !favorites.has(entry.id)) return false;
     if (!["all", "remaining"].includes(filter) && entry.kind !== filter) return false;
     if (phaseFilter && entry.phase !== phaseFilter) return false;
     if (franchiseFilter && franchiseFor(entry) !== franchiseFilter) return false;
     if (divisionFilter && divisionFor(entry) !== divisionFilter) return false;
     if (yearFilter && String(yearFor(entry)) !== yearFilter) return false;
     if (!presetMatches(entry, preset)) return false;
-    return `${entry.title} ${entry.detail} ${entry.phase}`.toLowerCase().includes(query.toLowerCase());
-  }), [scopedEntries, filter, query, completed, hideWatched, phaseFilter, franchiseFilter, divisionFilter, yearFilter, preset]);
+    const override = episodeMetadataOverrides[metadataKey(entry.collection, entry.season, entry.episode)] || metadataOverrides[entry.collection] || {};
+    const episode = episodeMetadata[metadataKey(entry.collection, entry.season, entry.episode)] || {};
+    return `${entry.title} ${entry.collection} ${entry.detail} ${entry.phase} ${franchiseFor(entry)} ${divisionFor(entry)} ${(override.cast || episode.cast || []).join(" ")} ${(override.genres || episode.genres || []).join(" ")} ${override.title || episode.episodeTitle || ""} ${override.description || episode.description || ""} ${notes[entry.id] || ""}`.toLowerCase().includes(query.toLowerCase());
+  }), [scopedEntries, filter, query, completed, favorites, hideWatched, notes, phaseFilter, franchiseFilter, divisionFilter, yearFilter, preset]);
 
   const collections = useMemo(() => {
     const groups: Array<[string, WatchEntry[]]> = [];
@@ -354,17 +369,24 @@ export default function Home() {
   }, [filtered]);
 
   function loadProfile(profile: Profile) {
-    setActiveProfileId(profile.id); setCompleted(new Set(profile.completed)); setHistory(profile.history); setWatchOrder(profile.order); setScope(profile.scope); setRatings(profile.ratings || {}); setFavorites(new Set(profile.favorites || [])); setNotes(profile.notes || {}); setView("archive");
+    setActiveProfileId(profile.id); setCompleted(new Set(profile.completed)); setHistory(profile.history); setActivity(profile.activity || []); setTheme(profile.theme || "infinity"); setWatchOrder(profile.order); setScope(profile.scope); setRatings(profile.ratings || {}); setFavorites(new Set(profile.favorites || [])); setNotes(profile.notes || {}); setView("archive");
   }
   function createProfile() {
     const name = prompt("Name this watch-through", `Watch-through ${profiles.length + 1}`)?.trim(); if (!name) return;
-    const now = new Date().toISOString(); const profile: Profile = { id: `profile-${Date.now()}`, name, order: watchOrder, scope, completed: [], history: [], ratings: {}, favorites: [], notes: {}, createdAt: now, updatedAt: now };
+    const now = new Date().toISOString(); const profile: Profile = { id: `profile-${Date.now()}`, name, order: watchOrder, scope, completed: [], history: [], activity: [], theme, ratings: {}, favorites: [], notes: {}, createdAt: now, updatedAt: now };
     setProfiles((current) => [...current, profile]); loadProfile(profile);
   }
   function deleteProfile(id: string) {
     if (profiles.length === 1) return alert("Keep at least one watch-through profile.");
     if (!confirm("Delete this watch-through and all of its local progress?")) return;
     const next = profiles.filter((profile) => profile.id !== id); setProfiles(next); if (id === activeProfileId) loadProfile(next[0]);
+  }
+  function recordActivity(id: string, type: ActivityEvent["type"]) {
+    setActivity((current) => [...current, { id, type, at: new Date().toISOString() }].slice(-250));
+  }
+  function openEntry(entry?: WatchEntry) {
+    if (!entry) return;
+    setSelectedEntry(entry); recordActivity(entry.id, "viewed");
   }
 
   function toggleEntry(id: string, label = "Item") {
@@ -400,7 +422,18 @@ export default function Home() {
       return;
     }
     setCompleted((current) => new Set(current).add(id));
-    setHistory((current) => [...current.filter((event) => event.id !== id), { id, at: watchedTimestamp(date) }]);
+    setHistory((current) => {
+      const itemDates = current.filter((event) => event.id === id).sort((a, b) => a.at.localeCompare(b.at));
+      const rest = current.filter((event) => event.id !== id);
+      return [...rest, { id, at: watchedTimestamp(date) }, ...itemDates.slice(1)];
+    });
+    recordActivity(id, "edited");
+  }
+  function addRewatch(id: string, date: string) {
+    setCompleted((current) => new Set(current).add(id));
+    setHistory((current) => [...current, { id, at: watchedTimestamp(date) }]);
+    recordActivity(id, "edited");
+    setToast({ message: "Rewatch added to viewing history", ids: [], wasComplete: true });
   }
   function undoToast() {
     if (!toast) return;
@@ -422,8 +455,8 @@ export default function Home() {
     setToast(undefined);
   }
   function exportProgress() {
-    const currentProfiles = profiles.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, ratings, favorites: [...favorites], notes } : profile);
-    const blob = new Blob([JSON.stringify({ version: 2, appVersion: APP_VERSION, exportedAt: new Date().toISOString(), activeProfileId, profiles: currentProfiles }, null, 2)], { type: "application/json" });
+    const currentProfiles = profiles.map((profile) => profile.id === activeProfileId ? { ...profile, order: watchOrder, scope, completed: [...completed], history, activity, theme, ratings, favorites: [...favorites], notes } : profile);
+    const blob = new Blob([JSON.stringify({ version: 3, appVersion: APP_VERSION, exportedAt: new Date().toISOString(), activeProfileId, profiles: currentProfiles }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = "infinity-archive-progress.json"; link.click(); URL.revokeObjectURL(url);
   }
   async function importProgress(file?: File) {
@@ -436,10 +469,10 @@ export default function Home() {
     const gradient = ctx.createLinearGradient(0, 0, 1200, 630); gradient.addColorStop(0, "#060a10"); gradient.addColorStop(1, "#182331"); ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1200, 630);
     ctx.strokeStyle = "#c6a45e"; ctx.lineWidth = 3; ctx.strokeRect(32, 32, 1136, 566);
     try { const logo = new Image(); logo.src = "./infinity-archive-logo.png"; await new Promise<void>((resolve, reject) => { logo.onload = () => resolve(); logo.onerror = () => reject(); }); ctx.drawImage(logo, 76, 62, 430, 86); } catch { ctx.fillStyle = "#c6a45e"; ctx.font = "600 34px sans-serif"; ctx.fillText("THE INFINITY ARCHIVE", 80, 105); }
-    ctx.fillStyle = "#f3efe7"; ctx.font = "700 96px sans-serif"; ctx.fillText(`${Math.round(percentage)}% COMPLETE`, 80, 265); ctx.font = "500 35px sans-serif"; ctx.fillStyle = "#aeb7c4"; ctx.fillText(`${scopedComplete} of ${scopedEntries.length} entries · ${formatTime(watchedRuntime)} watched`, 84, 330);
+    ctx.fillStyle = "#c6a45e"; ctx.font = "600 18px sans-serif"; ctx.fillText("ARCHIVE PASSPORT", 84, 182); ctx.fillStyle = "#f3efe7"; ctx.font = "700 82px sans-serif"; ctx.fillText(`${Math.round(percentage)}% COMPLETE`, 80, 265); ctx.font = "500 31px sans-serif"; ctx.fillStyle = "#aeb7c4"; ctx.fillText(`${scopedComplete} of ${scopedEntries.length} entries · ${formatTime(watchedRuntime)} watched · ${rewatchCount} rewatches`, 84, 330);
     infinityStones.forEach((stone, index) => { const earned = phaseStats.find((phase) => phase.phase === stone.phase)?.percent === 100; const x = 110 + index * 118; const y = 418; ctx.beginPath(); for (let point = 0; point < 6; point++) { const angle = Math.PI / 3 * point - Math.PI / 2; const px = x + Math.cos(angle) * 35; const py = y + Math.sin(angle) * 35; if (point) ctx.lineTo(px, py); else ctx.moveTo(px, py); } ctx.closePath(); ctx.fillStyle = earned ? stone.color : "#202a35"; ctx.globalAlpha = earned ? 1 : .55; ctx.fill(); ctx.strokeStyle = earned ? "#f4e3b2" : "#52606f"; ctx.stroke(); ctx.globalAlpha = 1; ctx.fillStyle = earned ? "#d9dde3" : "#687483"; ctx.font = "500 14px sans-serif"; ctx.textAlign = "center"; ctx.fillText(`P${index + 1}`, x, 475); }); ctx.textAlign = "left";
     ctx.fillStyle = "#c6a45e"; ctx.font = "600 24px sans-serif"; ctx.fillText(profiles.find((profile) => profile.id === activeProfileId)?.name.toUpperCase() || "MY WATCH-THROUGH", 84, 535); ctx.fillStyle = "#7e8997"; ctx.font = "20px sans-serif"; ctx.fillText(`${watchOrder === "release" ? "Release order" : "MCU timeline order"} · ${infinityStones.filter((stone) => phaseStats.find((phase) => phase.phase === stone.phase)?.percent === 100).length}/6 stones collected`, 84, 568);
-    const link = document.createElement("a"); link.download = "infinity-archive-progress.png"; link.href = canvas.toDataURL("image/png"); link.click();
+    const link = document.createElement("a"); link.download = "infinity-archive-passport.png"; link.href = canvas.toDataURL("image/png"); link.click();
   }
 
   const phaseStats = ["Phase One", "Phase Two", "Phase Three", "Phase Four", "Phase Five", "Phase Six"].map((phase) => {
@@ -463,6 +496,16 @@ export default function Home() {
   const rated = Object.entries(ratings).filter(([id, value]) => value > 0 && scopedEntries.some((entry) => entry.id === id));
   const averageRating = rated.length ? rated.reduce((sum, [, value]) => sum + value, 0) / rated.length : 0;
   const currentProfile = profiles.find((profile) => profile.id === activeProfileId);
+  const historyByItem = new Map<string, Array<{ id: string; at: string }>>();
+  history.slice().sort((a, b) => a.at.localeCompare(b.at)).forEach((event) => historyByItem.set(event.id, [...(historyByItem.get(event.id) || []), event]));
+  const rewatchCount = [...historyByItem.values()].reduce((sum, events) => sum + Math.max(0, events.length - 1), 0);
+  const recentActivity = activity.slice().sort((a, b) => b.at.localeCompare(a.at)).filter((event, index, all) => all.findIndex((other) => other.id === event.id && other.type === event.type) === index).slice(0, 20).map((event) => ({ ...event, entry: entries.find((item) => item.id === event.id) })).filter((event) => event.entry);
+  const calendarMonth = today ? { year: today.getFullYear(), month: today.getMonth() } : undefined;
+  const calendarDays = calendarMonth ? Array.from({ length: new Date(calendarMonth.year, calendarMonth.month + 1, 0).getDate() }, (_, index) => {
+    const date = new Date(calendarMonth.year, calendarMonth.month, index + 1); const key = localDateKey(date); const events = history.filter((event) => event.at.slice(0, 10) === key);
+    return { day: index + 1, key, events, offset: index === 0 ? date.getDay() : 0 };
+  }) : [];
+  const completedPhases = phaseStats.filter((stat) => stat.percent === 100);
   useEffect(() => {
     if (!hydrated || !activeProfileId) return;
     let seenByProfile: Record<string, string[]> = {}; try { seenByProfile = JSON.parse(localStorage.getItem(ACHIEVEMENTS_SEEN_KEY) || "{}"); } catch { /* start fresh */ }
@@ -483,6 +526,7 @@ export default function Home() {
         <button className={view === "archive" ? "active" : ""} onClick={() => { setView("archive"); setMobileNav(false); }}>Archive</button>
         <button className={view === "timeline" ? "active" : ""} onClick={() => { setView("timeline"); setMobileNav(false); }}>Journey</button>
         <button className={view === "analytics" ? "active" : ""} onClick={() => { setView("analytics"); setMobileNav(false); }}>Analytics</button>
+        <button className={view === "history" ? "active" : ""} onClick={() => { setView("history"); setMobileNav(false); }}>History</button>
         <button className={view === "settings" ? "active" : ""} onClick={() => { setView("settings"); setMobileNav(false); }}>Settings</button>
       </nav>
       <div className="header-tools">
@@ -501,15 +545,15 @@ export default function Home() {
         <div className="hero-content">
           <p className="eyebrow">Next in {watchOrder === "release" ? "release order" : "MCU timeline order"}</p>
           <h1>{nextEntry?.title}</h1>
-          {nextDetails?.episodeTitle && <h2 className="episode-title">“{nextDetails.episodeTitle}”</h2>}
+          {nextDetails?.episodeTitle && <h2 className="episode-title">{heroConcealed ? "Episode title hidden" : `“${nextDetails.episodeTitle}”`}</h2>}
           <p className="hero-meta">{nextEntry?.detail} <i /> {nextDetails?.releaseDate ? displayDate(nextDetails.releaseDate) : nextEntry?.kind} <i /> {nextEntry?.runtime} min</p>
           {!!nextDetails?.genres?.length && <p className="genre-row">{nextDetails.genres.join(" · ")}</p>}
           <p className={`hero-copy ${heroExpanded ? "expanded" : ""} ${detailsLoading ? "loading-copy" : ""}`}>{detailsLoading ? "Retrieving archive details…" : heroConcealed ? "Episode description hidden until you complete it." : nextDetails?.description || "Detailed information is not available for this archive entry yet."}</p>
           {!detailsLoading && !heroConcealed && (nextDetails?.description?.length || 0) > 220 && <button className="read-more" onClick={() => setHeroExpanded(!heroExpanded)}>{heroExpanded ? "Show less" : "Read more"}</button>}
-          {!!nextDetails?.cast?.length && <p className="cast-row"><span>Starring</span>{nextDetails.cast.join(" · ")}</p>}
+          {!!nextDetails?.cast?.length && !heroConcealed && <p className="cast-row"><span>Starring</span>{nextDetails.cast.join(" · ")}</p>}
           <div className="hero-actions">
             <button className="primary" onClick={() => nextEntry && toggleEntry(nextEntry.id, nextEntry.episode ? `${nextEntry.title} ${nextEntry.detail}` : nextEntry.title)}><span className="button-check"><Icon name="check" /></span>{nextEntry && completed.has(nextEntry.id) ? "Completed" : "Mark complete"}</button>
-            <button className="secondary" onClick={() => setSelectedEntry(nextEntry)}>View details <Icon name="chevron" /></button>
+            <button className="secondary" onClick={() => openEntry(nextEntry)}>View details <Icon name="chevron" /></button>
             {nextEntry && <a className="trailer-action" href={trailerUrl(nextEntry.collection)} target="_blank" rel="noreferrer"><Icon name="play" />Official trailer</a>}
           </div>
         </div>
@@ -523,7 +567,7 @@ export default function Home() {
         <article className="scope-stat"><div><strong>{sourceCount}</strong><small>Original listings</small></div><span>{entries.length} trackable items</span></article>
       </section>
 
-      <section className="next-up-shell"><div className="section-title"><div><p className="eyebrow">Up next</p><h2>Your queue</h2></div><span>{currentProfile?.name} · {watchOrder === "release" ? "Release order" : "MCU timeline"}</span></div><div className="next-queue">{nextQueue.map((item, index) => <article key={item.id}><button className="queue-open" onClick={() => setSelectedEntry(item)}><span>{String(index + 1).padStart(2, "0")}</span><PosterArt title={item.collection} /><div><small>{item.detail}</small><strong>{item.title}</strong></div></button><button className="queue-check" onClick={() => toggleEntry(item.id, item.title)} aria-label={`Complete ${item.title}`}><Icon name="check" /></button></article>)}</div></section>
+      <section className="next-up-shell"><div className="section-title"><div><p className="eyebrow">Up next</p><h2>Your queue</h2></div><span>{currentProfile?.name} · {watchOrder === "release" ? "Release order" : "MCU timeline"}</span></div><div className="next-queue">{nextQueue.map((item, index) => <article key={item.id}><button className="queue-open" onClick={() => openEntry(item)}><span>{String(index + 1).padStart(2, "0")}</span><PosterArt title={item.collection} /><div><small>{item.detail}</small><strong>{item.title}</strong></div></button><button className="queue-check" onClick={() => toggleEntry(item.id, item.title)} aria-label={`Complete ${item.title}`}><Icon name="check" /></button></article>)}</div></section>
 
       <section className="upcoming-shell"><div className="section-title"><div><p className="eyebrow">On the horizon</p><h2>Upcoming releases</h2></div><span>Future titles stay separate until release</span></div><div className="upcoming-grid">{upcomingProjects.map((project) => { const days = today ? Math.ceil((new Date(`${project.date}T12:00:00`).valueOf() - today.valueOf()) / 86400000) : 0; return <article key={project.title}><button className="upcoming-main" onClick={() => setSelectedUpcoming(project)}><PosterArt title={project.title} /><span><small>{project.type} · {displayDate(project.date)}</small><strong>{project.title}</strong><em>{days > 0 ? `${days} days` : "Released — awaiting archive update"}</em><b>View details →</b></span></button><a href={project.trailer} target="_blank" rel="noreferrer" aria-label={`Watch the ${project.title} trailer`}><Icon name="play" />Trailer</a></article>; })}</div></section>
 
@@ -532,11 +576,11 @@ export default function Home() {
           <div className="order-toggle"><button className={watchOrder === "release" ? "active" : ""} onClick={() => setWatchOrder("release")}>Release order</button><button className={watchOrder === "chronological" ? "active" : ""} onClick={() => setWatchOrder("chronological")}>MCU timeline</button></div>
           <div className="scope-toggle"><button className={scope === "completionist" ? "active" : ""} onClick={() => setScope("completionist")}>Completionist</button><button className={scope === "official" ? "active" : ""} onClick={() => setScope("official")}>Official MCU</button></div>
           <div className="filter-tabs">
-            {(["all", "remaining", "movie", "episode", "special", "short"] as Filter[]).map((item) => <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>{item === "all" ? "All" : item}</button>)}
+            {(["all", "remaining", "favorites", "movie", "episode", "special", "short"] as Filter[]).map((item) => <button key={item} className={filter === item ? "active" : ""} onClick={() => setFilter(item)}>{item === "all" ? "All" : item}</button>)}
           </div>
-          <label className="search"><Icon name="search" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search the archive…" /></label>
+          <label className="search"><Icon name="search" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Titles, cast, genres, notes…" /></label>
           <div className="archive-actions" aria-label="Archive display and selection controls">
-            <label className="option-toggle"><input type="checkbox" checked={hideSpoilers} onChange={(event) => setHideSpoilers(event.target.checked)} /><span />Hide episode spoilers</label>
+            <label className="option-toggle"><input type="checkbox" checked={hideSpoilers} onChange={(event) => setHideSpoilers(event.target.checked)} /><span />Spoiler-safe mode</label>
             <label className="option-toggle"><input type="checkbox" checked={hideWatched} onChange={(event) => setHideWatched(event.target.checked)} /><span />Hide watched</label>
             <label className="bulk-date"><span>Bulk watched</span><input type="date" max={localDateKey()} value={bulkWatchDate} onChange={(event) => setBulkWatchDate(event.target.value)} /></label>
             <button type="button" onClick={() => setScopedCompletion(true, bulkWatchDate)}>Select all</button>
@@ -552,7 +596,7 @@ export default function Home() {
             const isSeries = items.some((i) => i.kind === "episode"); const open = openCollections.has(segmentKey) || query.length > 0;
             const done = items.filter((item) => completed.has(item.id)).length; const allDone = done === items.length;
             return <article className={`watch-card ${allDone ? "complete" : ""}`} key={segmentKey}>
-              <button className="card-main" onClick={() => { if (isSeries) setOpenCollections((current) => { const next = new Set(current); if (next.has(segmentKey)) next.delete(segmentKey); else next.add(segmentKey); return next; }); else setSelectedEntry(items[0]); }}>
+              <button className="card-main" onClick={() => { if (isSeries) setOpenCollections((current) => { const next = new Set(current); if (next.has(segmentKey)) next.delete(segmentKey); else next.add(segmentKey); return next; }); else openEntry(items[0]); }}>
                 <span className="sequence">{String(items[0].order).padStart(3, "0")}</span>
                 <PosterArt title={collection} />
                 <span className="card-copy"><small>{items[0].phase} · {isSeries ? segmentLabel.replace(`${collection}: `, "") : items[0].kind}</small><strong>{collection}</strong><span className="mini-progress"><i style={{ width: `${done / items.length * 100}%` }} /></span><em>{done} of {items.length} complete</em></span>
@@ -561,7 +605,7 @@ export default function Home() {
               <a className="card-trailer" href={trailerUrl(collection)} target="_blank" rel="noreferrer" aria-label={`Find the official ${collection} trailer on YouTube`}><Icon name="play" /><span>Trailer</span></a>
               <button className={`complete-button ${allDone ? "done" : ""}`} onClick={() => completeCollection(items)} aria-label={allDone ? `Mark ${collection} incomplete` : `Complete ${collection}`}><Icon name="check" /></button>
               {isSeries && open && <div className="episodes">
-                {items.map((item) => <EpisodeRow key={item.id} item={item} completed={completed.has(item.id)} onOpen={() => setSelectedEntry(item)} onToggle={() => toggleEntry(item.id, `${item.title} ${item.detail}`)} />)}
+                {items.map((item) => <EpisodeRow key={item.id} item={item} completed={completed.has(item.id)} onOpen={() => openEntry(item)} onToggle={() => toggleEntry(item.id, `${item.title} ${item.detail}`)} />)}
               </div>}
             </article>;
           })}
@@ -580,19 +624,27 @@ export default function Home() {
         <article className="metric"><small>Estimated finish</small><strong className="date-metric">{estimatedFinish ? estimatedFinish.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Calculating…"}</strong><span>At an average of two hours per day</span></article>
         <article className="phase-panel"><div className="panel-heading"><h2>Phase progress</h2><span>Completion by release era</span></div>{phaseStats.map((stat) => <div className="phase-row" key={stat.phase}><b>{stat.phase}</b><div><i style={{ width: `${stat.percent}%` }} /></div><span>{stat.done}/{stat.total}</span></div>)}</article>
         <article className="breakdown"><div className="panel-heading"><h2>Archive composition</h2><span>What the 625-item journey contains</span></div>{(["movie", "episode", "special", "short"] as const).map((kind) => { const count = scopedEntries.filter(e => e.kind === kind).length; return <div key={kind}><span>{kind}</span><strong>{count}</strong><i style={{ width: `${count / scopedEntries.length * 100}%` }} /></div>; })}</article>
-        <article className="recent-panel"><div className="panel-heading"><h2>Recently completed</h2><span>Your latest archive activity</span></div>{recentEntries.length ? recentEntries.map((item) => <button key={item.id} onClick={() => setSelectedEntry(item.entry)}><span>{item.entry?.title}</span><small>{item.entry?.detail} · {displayWatchedDate(item.at)}</small></button>) : <p>Complete an item to begin your viewing history.</p>}</article>
+        <article className="recent-panel"><div className="panel-heading"><h2>Recently completed</h2><span>Your latest archive activity</span></div>{recentEntries.length ? recentEntries.map((item, index) => <button key={`${item.id}-${item.at}-${index}`} onClick={() => openEntry(item.entry)}><span>{item.entry?.title}</span><small>{item.entry?.detail} · {displayWatchedDate(item.at)}</small></button>) : <p>Complete an item to begin your viewing history.</p>}</article>
         <article className="metric"><small>Average rating</small><strong>{averageRating ? averageRating.toFixed(1) : "—"}</strong><span>{rated.length} rated · {favorites.size} favorites</span></article>
         <article className="stone-panel"><div className="panel-heading"><h2>The Infinity Collection</h2><span>{infinityStones.filter((stone) => phaseStats.find((phase) => phase.phase === stone.phase)?.percent === 100).length} of 6 stones collected</span></div><div className="stone-grid">{infinityStones.map((stone) => { const earned = phaseStats.find((phase) => phase.phase === stone.phase)?.percent === 100; return <div className={earned ? "stone earned" : "stone"} key={stone.name}><i style={{ "--stone": stone.color } as React.CSSProperties} /><strong>{stone.name}</strong><span>{stone.phase} · {earned ? "Collected" : "Locked"}</span></div>; })}</div></article>
+        <article className="recap-panel"><div className="panel-heading"><h2>End-of-phase recaps</h2><span>{completedPhases.length} complete</span></div><div className="recap-grid">{phaseStats.map((stat) => { const phaseEntries = scopedEntries.filter((entry) => entry.phase === stat.phase); const dates = history.filter((event) => phaseEntries.some((entry) => entry.id === event.id)).map((event) => event.at).sort(); const favorite = phaseEntries.filter((entry) => ratings[entry.id]).sort((a, b) => (ratings[b.id] || 0) - (ratings[a.id] || 0))[0]; return <div className={stat.percent === 100 ? "phase-recap complete" : "phase-recap"} key={stat.phase}><small>{stat.percent === 100 ? "Recap unlocked" : `${Math.round(stat.percent)}% complete`}</small><strong>{stat.phase}</strong><span>{formatTime(phaseEntries.reduce((sum, entry) => sum + entry.runtime, 0))} · {stat.total} entries</span>{stat.percent === 100 && <><b>Top rated: {favorite?.collection || "Not rated yet"}</b><em>{dates.length ? `${displayWatchedDate(dates[0])} — ${displayWatchedDate(dates.at(-1)!)}` : "Watch dates unavailable"}</em></>}</div>; })}</div></article>
         <article className="achievement-panel"><div className="panel-heading"><h2>Milestones</h2><span>{achievements.filter((item) => item.unlocked).length} of {achievements.length} unlocked</span></div><div className="achievement-grid">{achievements.map((item) => <div className={item.unlocked ? "achievement unlocked" : "achievement"} key={item.name}><i>{item.icon}</i><div><strong>{item.name}</strong><span>{item.description}</span></div></div>)}</div></article>
       </div>
+    </section>}
+
+    {view === "history" && <section className="inner-page history-page">
+      <div className="page-heading"><p className="eyebrow">Archive records</p><h1>Your viewing history.</h1><p>Recently opened and edited entries, every watch date, and rewatch activity for this profile.</p></div>
+      <div className="history-metrics"><article><small>Total viewings</small><strong>{history.length}</strong></article><article><small>Rewatches</small><strong>{rewatchCount}</strong></article><article><small>Active days</small><strong>{activeDays.size}</strong></article></div>
+      <div className="history-grid"><article className="calendar-panel"><div className="panel-heading"><h2>{today?.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</h2><span>Viewing calendar</span></div><div className="calendar-weekdays">{["S","M","T","W","T","F","S"].map((day, index) => <b key={`${day}-${index}`}>{day}</b>)}</div><div className="calendar-grid">{calendarDays[0] && Array.from({ length: calendarDays[0].offset }).map((_, index) => <i key={`blank-${index}`} />)}{calendarDays.map((day) => <button key={day.key} className={day.events.length ? "active" : ""} title={day.events.map((event) => entries.find((entry) => entry.id === event.id)?.title).filter(Boolean).join(", ")}><span>{day.day}</span>{day.events.length > 0 && <small>{day.events.length}</small>}</button>)}</div></article><article className="activity-panel"><div className="panel-heading"><h2>Recent activity</h2><span>Viewed and edited</span></div>{recentActivity.length ? recentActivity.map((event, index) => <button key={`${event.id}-${event.type}-${index}`} onClick={() => openEntry(event.entry)}><span><b>{event.entry?.title}</b><small>{event.type === "viewed" ? "Opened details" : "Updated personal record"}</small></span><time>{new Date(event.at).toLocaleDateString()}</time></button>) : <p>Open or edit an entry to build this list.</p>}</article></div>
+      <article className="rewatch-panel"><div className="panel-heading"><h2>Rewatch history</h2><span>Items viewed more than once</span></div>{[...historyByItem.entries()].filter(([, events]) => events.length > 1).sort((a, b) => b[1].length - a[1].length).map(([id, events]) => { const entry = entries.find((item) => item.id === id); return <button key={id} onClick={() => openEntry(entry)}><strong>{entry?.title}</strong><span>{events.length} viewings</span><small>{events.map((event) => displayWatchedDate(event.at)).join(" · ")}</small></button>; })}{rewatchCount === 0 && <p>No rewatches recorded yet. Use <b>Watch again</b> in any completed entry.</p>}</article>
     </section>}
 
     {view === "timeline" && <section className="inner-page timeline-page">
       <div className="page-heading"><p className="eyebrow">Release-order journey</p><h1>Six phases. One continuous archive.</h1><p>A high-level map of your progress without losing the precise release sequence.</p></div>
       <div className="timeline-track">{phaseStats.map((stat, index) => <article key={stat.phase}><div className="timeline-node"><span>{index + 1}</span></div><div><small>Era {String(index + 1).padStart(2, "0")}</small><h2>{stat.phase}</h2><p>{stat.total} items · {Math.round(stat.percent)}% complete</p><div className="phase-line"><i style={{ width: `${stat.percent}%` }} /></div></div></article>)}</div>
     </section>}
-    {view === "settings" && <section className="inner-page settings-page"><div className="page-heading"><p className="eyebrow">Local control center</p><h1>Your archive, your rules.</h1><p>Everything below stays on this device unless you export a backup.</p></div><div className="settings-grid"><article><div className="panel-heading"><h2>Watch-through profiles</h2><button onClick={createProfile}>New profile</button></div><p>Run a fresh chronological rewatch without erasing your original release-order journey.</p>{profiles.map((profile) => <div className={`profile-row ${profile.id === activeProfileId ? "active" : ""}`} key={profile.id}><button onClick={() => loadProfile(profile)}><strong>{profile.name}</strong><span>{profile.completed.length} completed · {profile.order === "release" ? "Release order" : "MCU timeline"}</span></button><button onClick={() => deleteProfile(profile.id)} aria-label={`Delete ${profile.name}`}>×</button></div>)}</article><article><div className="panel-heading"><h2>Data management</h2></div><p>Backup every profile, rating, favorite, note, and completion record.</p><div className="settings-actions"><button onClick={exportProgress}>Export full backup</button><button onClick={() => importRef.current?.click()}>Restore backup</button><button onClick={shareProgress}>Download share card</button><button className="danger" onClick={() => { if (confirm("Reset only this profile?")) { setCompleted(new Set()); setHistory([]); setRatings({}); setFavorites(new Set()); setNotes({}); } }}>Reset active profile</button></div></article><article><div className="panel-heading"><h2>Archive information</h2></div><dl><div><dt>App version</dt><dd>{APP_VERSION}</dd></div><div><dt>Metadata version</dt><dd>{METADATA_VERSION}</dd></div><div><dt>Storage</dt><dd>Local browser storage</dd></div><div><dt>Items indexed</dt><dd>{entries.length}</dd></div></dl><p className="update-note"><strong>What’s new</strong> Profiles, MCU timeline order, Next Up queue, advanced filters, ratings, favorites, notes, milestones, share cards, and upcoming releases.</p></article></div></section>}
-    <DetailDrawer key={selectedEntry?.id || "closed"} entry={selectedEntry} completed={!!selectedEntry && completed.has(selectedEntry.id)} hideSpoilers={hideSpoilers} rating={selectedEntry ? ratings[selectedEntry.id] || 0 : 0} favorite={!!selectedEntry && favorites.has(selectedEntry.id)} note={selectedEntry ? notes[selectedEntry.id] || "" : ""} watchedDate={selectedEntry ? history.find((event) => event.id === selectedEntry.id)?.at.slice(0, 10) || "" : ""} onClose={closeDetails} onToggle={() => selectedEntry && toggleEntry(selectedEntry.id, selectedEntry.episode ? `${selectedEntry.title} ${selectedEntry.detail}` : selectedEntry.title)} onRating={(value) => selectedEntry && setRatings((current) => { const next = { ...current }; if (value) next[selectedEntry.id] = value; else delete next[selectedEntry.id]; return next; })} onFavorite={() => selectedEntry && setFavorites((current) => { const next = new Set(current); if (next.has(selectedEntry.id)) next.delete(selectedEntry.id); else next.add(selectedEntry.id); return next; })} onNote={(value) => selectedEntry && setNotes((current) => ({ ...current, [selectedEntry.id]: value }))} onWatchedDate={(value) => selectedEntry && setEntryWatchedDate(selectedEntry.id, value)} />
+    {view === "settings" && <section className="inner-page settings-page"><div className="page-heading"><p className="eyebrow">Local control center</p><h1>Your archive, your rules.</h1><p>Everything below stays on this device unless you export a backup.</p></div><div className="settings-grid"><article><div className="panel-heading"><h2>Watch-through profiles</h2><button onClick={createProfile}>New profile</button></div><p>Run a fresh chronological rewatch without erasing your original release-order journey.</p>{profiles.map((profile) => <div className={`profile-row ${profile.id === activeProfileId ? "active" : ""}`} key={profile.id}><button onClick={() => loadProfile(profile)}><strong>{profile.name}</strong><span>{profile.completed.length} completed · {profile.order === "release" ? "Release order" : "MCU timeline"}</span></button><button onClick={() => deleteProfile(profile.id)} aria-label={`Delete ${profile.name}`}>×</button></div>)}</article><article><div className="panel-heading"><h2>Data management</h2></div><p>Backup every profile, viewing date, rating, favorite, note, theme, and activity record.</p><div className="settings-actions"><button onClick={exportProgress}>Export full backup</button><button onClick={() => importRef.current?.click()}>Restore backup</button><button onClick={shareProgress}>Download Archive Passport</button><button className="danger" onClick={() => { if (confirm("Reset only this profile?")) { setCompleted(new Set()); setHistory([]); setActivity([]); setRatings({}); setFavorites(new Set()); setNotes({}); } }}>Reset active profile</button></div></article><article><div className="panel-heading"><h2>Visual theme</h2></div><p>Choose a profile-specific title-page treatment.</p><div className="theme-grid">{themes.map((option) => <button key={option.id} className={theme === option.id ? `theme-${option.id} active` : `theme-${option.id}`} onClick={() => setTheme(option.id)}><i />{option.name}</button>)}</div></article><article><div className="panel-heading"><h2>Catalog update center</h2><span>Current</span></div><dl><div><dt>App version</dt><dd>{APP_VERSION}</dd></div><div><dt>Metadata version</dt><dd>{METADATA_VERSION}</dd></div><div><dt>Items indexed</dt><dd>{entries.length}</dd></div><div><dt>Upcoming monitored</dt><dd>{upcomingProjects.length}</dd></div></dl><p className="update-note"><strong>Latest catalog release</strong> No unresolved catalog migrations. Upcoming projects remain staged separately until their release date and a reviewed catalog update.</p></article><article className="whats-new"><div className="panel-heading"><h2>What’s new in v14</h2></div><p>Rewatch history, full spoiler-safe mode, metadata and notes search, Favorites filtering, dedicated History and calendar views, recent activity, five themes, catalog status, phase recaps, and the expanded Archive Passport.</p><p>MCU On This Day facts are reserved for the research-backed fact catalog update.</p></article></div></section>}
+    <DetailDrawer key={selectedEntry?.id || "closed"} entry={selectedEntry} completed={!!selectedEntry && completed.has(selectedEntry.id)} hideSpoilers={hideSpoilers} rating={selectedEntry ? ratings[selectedEntry.id] || 0 : 0} favorite={!!selectedEntry && favorites.has(selectedEntry.id)} note={selectedEntry ? notes[selectedEntry.id] || "" : ""} watchDates={selectedEntry ? (historyByItem.get(selectedEntry.id) || []).map((event) => event.at) : []} onClose={closeDetails} onToggle={() => selectedEntry && toggleEntry(selectedEntry.id, selectedEntry.episode ? `${selectedEntry.title} ${selectedEntry.detail}` : selectedEntry.title)} onRating={(value) => selectedEntry && (setRatings((current) => { const next = { ...current }; if (value) next[selectedEntry.id] = value; else delete next[selectedEntry.id]; return next; }), recordActivity(selectedEntry.id, "edited"))} onFavorite={() => selectedEntry && (setFavorites((current) => { const next = new Set(current); if (next.has(selectedEntry.id)) next.delete(selectedEntry.id); else next.add(selectedEntry.id); return next; }), recordActivity(selectedEntry.id, "edited"))} onNote={(value) => selectedEntry && (setNotes((current) => ({ ...current, [selectedEntry.id]: value })), recordActivity(selectedEntry.id, "edited"))} onWatchedDate={(value) => selectedEntry && setEntryWatchedDate(selectedEntry.id, value)} onRewatch={(value) => selectedEntry && addRewatch(selectedEntry.id, value)} />
     <UpcomingDrawer key={selectedUpcoming?.title || "upcoming-closed"} project={selectedUpcoming} onClose={() => setSelectedUpcoming(undefined)} />
     {achievementToast && <div className="achievement-splash" role="status"><button onClick={() => setAchievementToast(undefined)} aria-label="Dismiss achievement">×</button><div className="achievement-badge"><span>{achievementToast.icon}</span></div><p>Achievement unlocked</p><h2>{achievementToast.name}</h2><div>{achievementToast.description}</div></div>}
     {toast && <div className="undo-toast" role="status"><span>{toast.message}</span><button onClick={undoToast}>Undo</button></div>}

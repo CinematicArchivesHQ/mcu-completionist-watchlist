@@ -5,6 +5,8 @@ export type Profile = {
   id: string; name: string; order: WatchOrder; scope: "completionist" | "official";
   completed: string[]; history: Array<{ id: string; at: string }>;
   ratings: Record<string, number>; favorites: string[]; notes: Record<string, string>;
+  activity?: Array<{ id: string; at: string; type: "viewed" | "edited" }>;
+  theme?: "infinity" | "tva" | "wakanda" | "stark" | "scarlet";
   createdAt: string; updatedAt: string;
 };
 
