@@ -4,8 +4,8 @@ const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
   images: { unoptimized: true },
-  basePath: process.env.NODE_ENV === "production" ? "/-mcu-completionist-watchlist" : "",
-  assetPrefix: process.env.NODE_ENV === "production" ? "/-mcu-completionist-watchlist/" : "",
+  basePath: process.env.NODE_ENV === "production" ? "/mcu-completionist-watchlist" : "",
+  assetPrefix: process.env.NODE_ENV === "production" ? "/mcu-completionist-watchlist/" : "",
 };
 
 export default nextConfig;
