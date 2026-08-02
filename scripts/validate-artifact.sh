@@ -9,7 +9,7 @@ index="${project_root}/out/index.html"
   exit 66
 }
 
-rg -q '/mcu-completionist-watchlist/_next/' "${index}" || {
+grep -Fq '/mcu-completionist-watchlist/_next/' "${index}" || {
   echo "Static export is missing the GitHub Pages repository base path." >&2
   exit 66
 }
