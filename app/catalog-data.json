@@ -1,14 +1,16 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.01.1",
+  "catalogVersion": "2026.08.02.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": null,
+    "lastCheckedAt": "2026-08-02T03:02:35.522Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
   "discovery": {
-    "mediaTypes": ["movie"],
+    "mediaTypes": [
+      "movie"
+    ],
     "companyName": "Marvel Studios",
     "keywordName": "Marvel Cinematic Universe (MCU)",
     "horizonYears": 5
@@ -16,26 +18,39 @@
   "projects": [
     {
       "archiveId": "mcu-spider-man-brand-new-day-2026",
-      "tmdbId": null,
+      "tmdbId": 969681,
       "mediaType": "movie",
       "title": "Spider-Man: Brand New Day",
       "expectedYear": 2026,
       "releaseDate": "2026-07-31",
-      "status": "upcoming",
+      "status": "released",
       "type": "Movie",
       "phase": "Phase Six",
       "scope": "official",
-      "runtime": null,
-      "genres": ["Superhero", "Action", "Adventure"],
-      "cast": ["Tom Holland", "Zendaya", "Jon Bernthal"],
-      "description": "Alone in a New York City that no longer remembers Peter Parker, Peter has devoted himself to being a full-time Spider-Man. As the pressure intensifies, a surprising physical evolution threatens his existence and forces him into an uneasy alliance with the Punisher.",
-      "trailer": "https://www.youtube.com/watch?v=aBlsrtxuwss",
-      "posterPath": null,
-      "lastVerifiedAt": null
+      "runtime": 145,
+      "genres": [
+        "Science Fiction",
+        "Action",
+        "Adventure"
+      ],
+      "cast": [
+        "Tom Holland",
+        "Zendaya",
+        "Mark Ruffalo",
+        "Jon Bernthal",
+        "Jacob Batalon",
+        "Sadie Sink",
+        "Florence Pugh",
+        "Liza Colón-Zayas"
+      ],
+      "description": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
+      "trailer": "https://www.youtube.com/watch?v=P3uI5sLosKU",
+      "posterPath": "/iPOn6DinuVyLY17YM9mKuPofV08.jpg",
+      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
     },
     {
       "archiveId": "mcu-avengers-doomsday-2026",
-      "tmdbId": null,
+      "tmdbId": 1003596,
       "mediaType": "movie",
       "title": "Avengers: Doomsday",
       "expectedYear": 2026,
@@ -44,16 +59,125 @@
       "type": "Movie",
       "phase": "Phase Six",
       "scope": "official",
-      "runtime": null,
-      "genres": ["Superhero", "Action", "Science fiction"],
-      "cast": ["Robert Downey Jr.", "Chris Hemsworth", "Pedro Pascal"],
-      "description": "Heroes from three distinct universes are set on a deadly collision course as an existential multiversal threat emerges. The Avengers, Wakandans, Fantastic Four, New Avengers, and X-Men must confront Victor von Doom before their worlds are destroyed.",
+      "runtime": 165,
+      "genres": [
+        "Science Fiction",
+        "Action",
+        "Adventure"
+      ],
+      "cast": [
+        "Robert Downey Jr.",
+        "Chris Evans",
+        "Chris Hemsworth",
+        "Pedro Pascal",
+        "Paul Rudd",
+        "Anthony Mackie",
+        "Florence Pugh",
+        "Vanessa Kirby"
+      ],
+      "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=irVNGjRFZGk",
-      "posterPath": null,
-      "lastVerifiedAt": null
+      "posterPath": "/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
+      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1003598",
+      "tmdbId": 1003598,
+      "mediaType": "movie",
+      "title": "Avengers: Secret Wars",
+      "expectedYear": 2027,
+      "releaseDate": "2027-12-17",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Science Fiction",
+        "Action",
+        "Adventure"
+      ],
+      "cast": [
+        "Robert Downey Jr.",
+        "Pedro Pascal",
+        "Vanessa Kirby",
+        "Ebon Moss-Bachrach",
+        "Joseph Quinn",
+        "Sebastian Stan",
+        "Florence Pugh",
+        "David Harbour"
+      ],
+      "description": "An upcoming film in Phase Six of the Marvel Cinematic Universe (MCU) and the finale of The Multiverse Saga.",
+      "trailer": "",
+      "posterPath": "/f0YBuh4hyiAheXhh4JnJWoKi9g5.jpg",
+      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1386618",
+      "tmdbId": 1386618,
+      "mediaType": "movie",
+      "title": "Black Panther 3",
+      "expectedYear": 2028,
+      "releaseDate": "2028-12-15",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Science Fiction",
+        "Action",
+        "Adventure"
+      ],
+      "cast": [
+        "David Jonsson",
+        "Letitia Wright",
+        "Winston Duke",
+        "Denzel Washington"
+      ],
+      "description": "T'Challa's son, T'Challa, comes of age with eyes on the crown of Wakanda.",
+      "trailer": "https://www.youtube.com/watch?v=M0xHK86xXUc",
+      "posterPath": "/zJc9fYZxgq4yzI0Oru2e1Cf3a3V.jpg",
+      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "metadata",
+      "title": "Black Panther 3",
+      "detail": "genres:  → Science Fiction, Action, Adventure; cast:  → David Jonsson, Letitia Wright, Winston Duke, Denzel Washington; trailer:  → https://www.youtube.com/watch?v=M0xHK86xXUc"
+    },
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "metadata",
+      "title": "Avengers: Secret Wars",
+      "detail": "genres:  → Science Fiction, Action, Adventure; cast:  → Robert Downey Jr., Pedro Pascal, Vanessa Kirby, Ebon Moss-Bachrach, Joseph Quinn, Sebastian Stan, Florence Pugh, David Harbour"
+    },
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "runtime: not set → 165; genres: Superhero, Action, Science fiction → Science Fiction, Action, Adventure; cast: Robert Downey Jr., Chris Hemsworth, Pedro Pascal → Robert Downey Jr., Chris Evans, Chris Hemsworth, Pedro Pascal, Paul Rudd, Anthony Mackie, Florence Pugh, Vanessa Kirby; synopsis: Heroes from three distinct universes are set on a deadly collision course as an existential multiversal threat emerges. The Avengers, Wakandans, Fantastic Four, New Avengers, and X-Men must confront Victor von Doom before their worlds are destroyed. → Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.; poster: not set → /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg"
+    },
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "released",
+      "title": "Spider-Man: Brand New Day",
+      "detail": "runtime: not set → 145; genres: Superhero, Action, Adventure → Science Fiction, Action, Adventure; cast: Tom Holland, Zendaya, Jon Bernthal → Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas; synopsis: Alone in a New York City that no longer remembers Peter Parker, Peter has devoted himself to being a full-time Spider-Man. As the pressure intensifies, a surprising physical evolution threatens his existence and forces him into an uneasy alliance with the Punisher. → Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.; poster: not set → /iPOn6DinuVyLY17YM9mKuPofV08.jpg; trailer: https://www.youtube.com/watch?v=aBlsrtxuwss → https://www.youtube.com/watch?v=P3uI5sLosKU; archive status: upcoming → released"
+    },
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "discovered",
+      "title": "Black Panther 3",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
+    {
+      "at": "2026-08-02T03:02:35.522Z",
+      "type": "discovered",
+      "title": "Avengers: Secret Wars",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
     {
       "at": "2026-08-01T00:00:00.000Z",
       "type": "automation",
