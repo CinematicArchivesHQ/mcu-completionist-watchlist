@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createDiscoveredMovieProject, nextCatalogVersion, normalizeTitle, selectExactSearchResult, updateProjectFromTmdb, usTheatricalDate, validateCatalog } from "../scripts/catalog-steward.mjs";
+import { createDiscoveredMovieProject, filterNewDiscoveries, nextCatalogVersion, normalizeTitle, selectExactSearchResult, updateProjectFromTmdb, usTheatricalDate, validateCatalog } from "../scripts/catalog-steward.mjs";
 
 const project = {
   archiveId: "mcu-example-2026", tmdbId: 42, mediaType: "movie", title: "Example: New Day", expectedYear: 2026,
@@ -49,6 +49,28 @@ test("creates stable IDs for high-confidence discovered movies", () => {
   assert.equal(discovered.archiveId, "mcu-tmdb-movie-9001");
   assert.equal(discovered.tmdbId, 9001);
   assert.equal(discovered.status, "upcoming");
+});
+
+test("does not rediscover a known movie while its TMDB ID is still unpinned", () => {
+  const catalog = {
+    projects: [{
+      archiveId: "mcu-spider-man-brand-new-day-2026",
+      tmdbId: null,
+      title: "Spider-Man: Brand New Day",
+      expectedYear: 2026,
+      releaseDate: "2026-07-31",
+    }],
+  };
+  assert.deepEqual(filterNewDiscoveries(catalog, [
+    { id: 1003596, title: "Spider-Man: Brand New Day", release_date: "2026-07-31" },
+  ]), []);
+});
+
+test("does not rediscover a movie whose TMDB ID is already pinned", () => {
+  const catalog = { projects: [{ ...project, tmdbId: 1003596 }] };
+  assert.deepEqual(filterNewDiscoveries(catalog, [
+    { id: 1003596, title: "A Retitled Result", release_date: "2026-07-31" },
+  ]), []);
 });
 
 test("validation rejects duplicate permanent IDs", () => {

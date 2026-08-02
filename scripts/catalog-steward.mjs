@@ -131,6 +131,24 @@ export function createDiscoveredMovieProject(result) {
   };
 }
 
+function projectReleaseKey(title, year) {
+  return `${normalizeTitle(title)}::${year || "unknown"}`;
+}
+
+export function filterNewDiscoveries(catalog, results = []) {
+  const existingTmdbIds = new Set(catalog.projects.map((project) => project.tmdbId).filter(Boolean));
+  const existingReleaseKeys = new Set(catalog.projects.map((project) => {
+    const year = project.expectedYear || Number(String(project.releaseDate || "").slice(0, 4)) || null;
+    return projectReleaseKey(project.title, year);
+  }));
+
+  return results.filter((result) => {
+    if (!result.id || !result.title || !result.release_date || existingTmdbIds.has(result.id)) return false;
+    const year = Number(String(result.release_date).slice(0, 4)) || null;
+    return !existingReleaseKeys.has(projectReleaseKey(result.title, year));
+  }).map(createDiscoveredMovieProject);
+}
+
 async function discoverUpcomingMovies(catalog, token, today) {
   if (!catalog.steward.automaticDiscovery || !catalog.discovery?.mediaTypes?.includes("movie")) return [];
   const companyId = await resolveNamedId("company", catalog.discovery.companyName, token);
@@ -154,8 +172,7 @@ async function discoverUpcomingMovies(catalog, token, today) {
     found.push(...(response.results || []));
     if (page >= (response.total_pages || 1)) break;
   }
-  const existing = new Set(catalog.projects.map((project) => project.tmdbId).filter(Boolean));
-  return found.filter((result) => result.id && result.title && result.release_date && !existing.has(result.id)).map(createDiscoveredMovieProject);
+  return filterNewDiscoveries(catalog, found);
 }
 
 function healthCommitDue(lastCheckedAt, now, intervalDays) {
@@ -174,6 +191,20 @@ export async function runSteward({ write = false, checkOnly = false, token = pro
   const events = [];
   let contentChanged = false;
 
+  // Resolve every known record before discovery. Otherwise TMDB can return a
+  // known project as "new" while its permanent external ID is still null.
+  for (const current of catalog.projects) {
+    if (current.status === "canceled" || current.tmdbId) continue;
+    try {
+      current.tmdbId = await resolveTmdbId(current, token);
+      contentChanged = true;
+      messages.push(`${current.title}: pinned TMDB id ${current.tmdbId}`);
+    } catch (error) {
+      messages.push(`WARNING: ${error.message}`);
+    }
+  }
+  validateCatalog(catalog);
+
   try {
     const discovered = await discoverUpcomingMovies(catalog, token, today);
     for (const project of discovered) {
@@ -189,13 +220,11 @@ export async function runSteward({ write = false, checkOnly = false, token = pro
   for (let index = 0; index < catalog.projects.length; index += 1) {
     const current = catalog.projects[index];
     if (current.status === "canceled") continue;
-    let tmdbId = current.tmdbId;
+    const tmdbId = current.tmdbId;
     try {
       if (!tmdbId) {
-        tmdbId = await resolveTmdbId(current, token);
-        current.tmdbId = tmdbId;
-        contentChanged = true;
-        messages.push(`${current.title}: pinned TMDB id ${tmdbId}`);
+        messages.push(`WARNING: ${current.title}: TMDB ID remains unresolved; metadata refresh skipped`);
+        continue;
       }
       const details = await tmdb(`/movie/${tmdbId}?append_to_response=release_dates,credits,videos&language=en-US`, token);
       if (normalizeTitle(details.title) !== normalizeTitle(current.title) && normalizeTitle(details.original_title) !== normalizeTitle(current.title)) {
