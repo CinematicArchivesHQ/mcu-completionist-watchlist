@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "catalogVersion": "2026.08.01.1",
+  "steward": {
+    "source": "TMDB",
+    "lastCheckedAt": null,
+    "automaticDiscovery": true,
+    "healthCommitIntervalDays": 7
+  },
+  "discovery": {
+    "mediaTypes": ["movie"],
+    "companyName": "Marvel Studios",
+    "keywordName": "Marvel Cinematic Universe (MCU)",
+    "horizonYears": 5
+  },
+  "projects": [
+    {
+      "archiveId": "mcu-spider-man-brand-new-day-2026",
+      "tmdbId": null,
+      "mediaType": "movie",
+      "title": "Spider-Man: Brand New Day",
+      "expectedYear": 2026,
+      "releaseDate": "2026-07-31",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Phase Six",
+      "scope": "official",
+      "runtime": null,
+      "genres": ["Superhero", "Action", "Adventure"],
+      "cast": ["Tom Holland", "Zendaya", "Jon Bernthal"],
+      "description": "Alone in a New York City that no longer remembers Peter Parker, Peter has devoted himself to being a full-time Spider-Man. As the pressure intensifies, a surprising physical evolution threatens his existence and forces him into an uneasy alliance with the Punisher.",
+      "trailer": "https://www.youtube.com/watch?v=aBlsrtxuwss",
+      "posterPath": null,
+      "lastVerifiedAt": null
+    },
+    {
+      "archiveId": "mcu-avengers-doomsday-2026",
+      "tmdbId": null,
+      "mediaType": "movie",
+      "title": "Avengers: Doomsday",
+      "expectedYear": 2026,
+      "releaseDate": "2026-12-18",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Phase Six",
+      "scope": "official",
+      "runtime": null,
+      "genres": ["Superhero", "Action", "Science fiction"],
+      "cast": ["Robert Downey Jr.", "Chris Hemsworth", "Pedro Pascal"],
+      "description": "Heroes from three distinct universes are set on a deadly collision course as an existential multiversal threat emerges. The Avengers, Wakandans, Fantastic Four, New Avengers, and X-Men must confront Victor von Doom before their worlds are destroyed.",
+      "trailer": "https://www.youtube.com/watch?v=irVNGjRFZGk",
+      "posterPath": null,
+      "lastVerifiedAt": null
+    }
+  ],
+  "changelog": [
+    {
+      "at": "2026-08-01T00:00:00.000Z",
+      "type": "automation",
+      "title": "Catalog Steward enabled",
+      "detail": "Known Infinity Archive releases are now monitored for date changes, metadata updates, and release-day promotion."
+    }
+  ]
+}

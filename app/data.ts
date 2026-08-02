@@ -1,3 +1,5 @@
+import catalogData from "./catalog-data.json";
+
 export type WatchEntry = {
   id: string;
   order: number;
@@ -11,6 +13,11 @@ export type WatchEntry = {
   season?: number;
   runtime: number;
   scope: "official" | "adjacent" | "promotional";
+  releaseDate?: string;
+  genres?: string[];
+  cast?: string[];
+  description?: string;
+  trailer?: string;
 };
 
 const rawTitles = `Iron Man
@@ -183,12 +190,35 @@ function expand(title: string): Expanded[] {
 
 const sourceTitles = rawTitles.trim().split(/\n/).map((title) => title.trim()).filter(Boolean);
 let order = 0;
-export const entries: WatchEntry[] = sourceTitles.flatMap((sourceTitle, sourceIndex) => expand(sourceTitle).map((item) => {
+const baseEntries: WatchEntry[] = sourceTitles.flatMap((sourceTitle, sourceIndex) => expand(sourceTitle).map((item) => {
   const kind: WatchEntry["kind"] = item.episode ? "episode" : specialPattern.test(item.title) ? "special" : shortPattern.test(item.title) ? "short" : "movie";
   const scope: WatchEntry["scope"] = promotional.test(item.title) ? "promotional" : adjacent.test(item.title) ? "adjacent" : "official";
   order += 1;
   return { id: `entry-${order}`, order, title: item.title, kind, detail: item.detail, phase: phaseFor(sourceIndex), collection: item.title, sourceTitle: item.sourceTitle, season: item.season, episode: item.episode, runtime: runtimeFor(kind, item.title), scope };
 }));
 
-export const sourceCount = sourceTitles.length;
+const existingCollections = new Set(baseEntries.map((entry) => entry.collection));
+const releasedManagedEntries: WatchEntry[] = catalogData.projects
+  .filter((project) => project.status === "released" && !existingCollections.has(project.title))
+  .map((project, index) => ({
+    id: project.archiveId,
+    order: baseEntries.length + index + 1,
+    title: project.title,
+    kind: project.mediaType === "movie" ? "movie" : "special",
+    detail: "Standalone",
+    phase: project.phase,
+    collection: project.title,
+    sourceTitle: project.title,
+    runtime: project.runtime || 126,
+    scope: project.scope as WatchEntry["scope"],
+    releaseDate: project.releaseDate,
+    genres: project.genres,
+    cast: project.cast,
+    description: project.description,
+    trailer: project.trailer,
+  }));
+
+export const entries: WatchEntry[] = [...baseEntries, ...releasedManagedEntries];
+
+export const sourceCount = sourceTitles.length + releasedManagedEntries.length;
 export const totalRuntime = entries.reduce((sum, entry) => sum + entry.runtime, 0);

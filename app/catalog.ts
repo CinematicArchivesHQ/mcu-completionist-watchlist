@@ -1,4 +1,5 @@
 import type { WatchEntry } from "./data";
+import catalogData from "./catalog-data.json";
 
 export type WatchOrder = "release" | "chronological";
 export type Profile = {
@@ -158,11 +159,27 @@ export function presetMatches(entry: WatchEntry, preset: string) {
   return true;
 }
 
-export type UpcomingProject = { title: string; date: string; type: string; runtime?: number; genres: string[]; cast: string[]; description: string; trailer: string };
-export const upcomingProjects: UpcomingProject[] = [
-  { title: "Spider-Man: Brand New Day", date: "2026-07-31", type: "Movie", genres: ["Superhero", "Action", "Adventure"], cast: ["Tom Holland", "Zendaya", "Jon Bernthal"], description: "Alone in a New York City that no longer remembers Peter Parker, Peter has devoted himself to being a full-time Spider-Man. As the pressure intensifies, a surprising physical evolution threatens his existence and forces him into an uneasy alliance with the Punisher.", trailer: "https://www.youtube.com/watch?v=aBlsrtxuwss" },
-  { title: "Avengers: Doomsday", date: "2026-12-18", type: "Movie", genres: ["Superhero", "Action", "Science fiction"], cast: ["Robert Downey Jr.", "Chris Hemsworth", "Pedro Pascal"], description: "Heroes from three distinct universes are set on a deadly collision course as an existential multiversal threat emerges. The Avengers, Wakandans, Fantastic Four, New Avengers, and X-Men must confront Victor von Doom before their worlds are destroyed.", trailer: "https://www.youtube.com/watch?v=irVNGjRFZGk" },
-];
+export type UpcomingProject = { archiveId: string; title: string; date: string; type: string; runtime?: number; genres: string[]; cast: string[]; description: string; trailer: string };
+export const upcomingProjects: UpcomingProject[] = catalogData.projects
+  .filter((project) => project.status === "upcoming")
+  .map((project) => ({
+    archiveId: project.archiveId,
+    title: project.title,
+    date: project.releaseDate,
+    type: project.type,
+    runtime: project.runtime || undefined,
+    genres: project.genres,
+    cast: project.cast,
+    description: project.description,
+    trailer: project.trailer,
+  }));
+
+export const catalogInfo = {
+  version: catalogData.catalogVersion,
+  lastCheckedAt: catalogData.steward.lastCheckedAt as string | null,
+  source: catalogData.steward.source,
+  changelog: catalogData.changelog,
+};
 
 export const infinityStones = [
   { phase: "Phase One", name: "Space Stone", color: "#3a8cff" },
