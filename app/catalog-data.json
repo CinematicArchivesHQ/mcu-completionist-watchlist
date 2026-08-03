@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.02.1",
+  "catalogVersion": "2026.08.03.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-02T03:02:35.522Z",
+    "lastCheckedAt": "2026-08-03T13:22:18.709Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -35,18 +35,18 @@
       ],
       "cast": [
         "Tom Holland",
-        "Zendaya",
-        "Mark Ruffalo",
-        "Jon Bernthal",
-        "Jacob Batalon",
         "Sadie Sink",
-        "Florence Pugh",
-        "Liza Colón-Zayas"
+        "Tramell Tillman",
+        "Zendaya",
+        "Jacob Batalon",
+        "Jon Bernthal",
+        "Mark Ruffalo",
+        "Florence Pugh"
       ],
       "description": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
       "trailer": "https://www.youtube.com/watch?v=P3uI5sLosKU",
       "posterPath": "/iPOn6DinuVyLY17YM9mKuPofV08.jpg",
-      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
+      "lastVerifiedAt": "2026-08-03T13:22:18.709Z"
     },
     {
       "archiveId": "mcu-avengers-doomsday-2026",
@@ -142,6 +142,12 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-03T13:22:18.709Z",
+      "type": "metadata",
+      "title": "Spider-Man: Brand New Day",
+      "detail": "cast: Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas → Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jacob Batalon, Jon Bernthal, Mark Ruffalo, Florence Pugh"
+    },
     {
       "at": "2026-08-02T03:02:35.522Z",
       "type": "metadata",
