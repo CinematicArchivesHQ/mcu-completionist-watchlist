@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.15.1",
+  "catalogVersion": "2026.08.16.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-15T10:42:41.481Z",
+    "lastCheckedAt": "2026-08-16T10:43:14.891Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/bh2OuKvq19jBHsloUVCfPSZZw81.jpg",
-      "lastVerifiedAt": "2026-08-15T10:42:41.481Z"
+      "posterPath": "/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
+      "lastVerifiedAt": "2026-08-16T10:43:14.891Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -158,17 +158,33 @@
         "Adventure"
       ],
       "cast": [
-        "Samara Weaving",
+        "Sadie Sink",
         "Kit Connor",
-        "Sadie Sink"
+        "Christopher Abbott",
+        "Samara Weaving",
+        "Inde Navarrette",
+        "Maya Boyd",
+        "Adam Driver"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics team. Plot TBA.",
-      "trailer": "",
-      "posterPath": "/pLtwkpq9vkl193Ce4hoMdwtKtAa.jpg",
-      "lastVerifiedAt": "2026-08-15T10:42:41.481Z"
+      "trailer": "https://www.youtube.com/watch?v=sTyaJIRNHVQ",
+      "posterPath": "/jSn3jOzI91dOx4aVdfMrirWXH6R.jpg",
+      "lastVerifiedAt": "2026-08-16T10:43:14.891Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-16T10:43:14.891Z",
+      "type": "metadata",
+      "title": "Untitled X-Men Film",
+      "detail": "cast: Samara Weaving, Kit Connor, Sadie Sink → Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver; poster: /pLtwkpq9vkl193Ce4hoMdwtKtAa.jpg → /jSn3jOzI91dOx4aVdfMrirWXH6R.jpg; trailer:  → https://www.youtube.com/watch?v=sTyaJIRNHVQ"
+    },
+    {
+      "at": "2026-08-16T10:43:14.891Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /bh2OuKvq19jBHsloUVCfPSZZw81.jpg → /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg"
+    },
     {
       "at": "2026-08-15T10:42:41.481Z",
       "type": "metadata",
