@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.16.1",
+  "catalogVersion": "2026.08.17.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-16T10:43:14.891Z",
+    "lastCheckedAt": "2026-08-17T10:50:26.715Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
-      "lastVerifiedAt": "2026-08-16T10:43:14.891Z"
+      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
+      "lastVerifiedAt": "2026-08-17T10:50:26.715Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -164,15 +164,28 @@
         "Samara Weaving",
         "Inde Navarrette",
         "Maya Boyd",
-        "Adam Driver"
+        "Adam Driver",
+        "Hudson Williams"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics team. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=sTyaJIRNHVQ",
       "posterPath": "/jSn3jOzI91dOx4aVdfMrirWXH6R.jpg",
-      "lastVerifiedAt": "2026-08-16T10:43:14.891Z"
+      "lastVerifiedAt": "2026-08-17T10:50:26.715Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-17T10:50:26.715Z",
+      "type": "metadata",
+      "title": "Untitled X-Men Film",
+      "detail": "cast: Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver → Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver, Hudson Williams"
+    },
+    {
+      "at": "2026-08-17T10:50:26.715Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg → /jzPwsojjFStf5lR5Nm07w2hH56G.jpg"
+    },
     {
       "at": "2026-08-16T10:43:14.891Z",
       "type": "metadata",
