@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.17.1",
+  "catalogVersion": "2026.08.18.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-17T10:50:26.715Z",
+    "lastCheckedAt": "2026-08-18T10:49:40.557Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -164,16 +164,57 @@
         "Samara Weaving",
         "Inde Navarrette",
         "Maya Boyd",
-        "Adam Driver",
-        "Hudson Williams"
+        "Adam Driver"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics team. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=sTyaJIRNHVQ",
       "posterPath": "/jSn3jOzI91dOx4aVdfMrirWXH6R.jpg",
-      "lastVerifiedAt": "2026-08-17T10:50:26.715Z"
+      "lastVerifiedAt": "2026-08-18T10:49:40.557Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1738010",
+      "tmdbId": 1738010,
+      "mediaType": "movie",
+      "title": "Ghost Rider",
+      "expectedYear": 2028,
+      "releaseDate": "2028-07-28",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Fantasy",
+        "Action"
+      ],
+      "cast": [
+        "Ryan Gosling"
+      ],
+      "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics character of the same name. Plot TBA.",
+      "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
+      "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
+      "lastVerifiedAt": "2026-08-18T10:49:40.557Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-18T10:49:40.557Z",
+      "type": "metadata",
+      "title": "Ghost Rider",
+      "detail": "genres:  → Fantasy, Action; cast:  → Ryan Gosling; trailer:  → https://www.youtube.com/watch?v=r-JdSUy1vaY"
+    },
+    {
+      "at": "2026-08-18T10:49:40.557Z",
+      "type": "metadata",
+      "title": "Untitled X-Men Film",
+      "detail": "cast: Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver, Hudson Williams → Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver"
+    },
+    {
+      "at": "2026-08-18T10:49:40.557Z",
+      "type": "discovered",
+      "title": "Ghost Rider",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
     {
       "at": "2026-08-17T10:50:26.715Z",
       "type": "metadata",
