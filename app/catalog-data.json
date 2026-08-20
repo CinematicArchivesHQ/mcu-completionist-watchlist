@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.18.1",
+  "catalogVersion": "2026.08.20.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-18T10:49:40.557Z",
+    "lastCheckedAt": "2026-08-20T10:50:28.245Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -184,8 +184,7 @@
       "scope": "official",
       "runtime": null,
       "genres": [
-        "Fantasy",
-        "Action"
+        "Fantasy"
       ],
       "cast": [
         "Ryan Gosling"
@@ -193,10 +192,16 @@
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics character of the same name. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
       "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
-      "lastVerifiedAt": "2026-08-18T10:49:40.557Z"
+      "lastVerifiedAt": "2026-08-20T10:50:28.245Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-20T10:50:28.245Z",
+      "type": "metadata",
+      "title": "Ghost Rider",
+      "detail": "genres: Fantasy, Action → Fantasy"
+    },
     {
       "at": "2026-08-18T10:49:40.557Z",
       "type": "metadata",
