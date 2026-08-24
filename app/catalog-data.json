@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.08.20.1",
+  "catalogVersion": "2026.08.24.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-08-20T10:50:28.245Z",
+    "lastCheckedAt": "2026-08-24T10:56:30.121Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -45,8 +45,8 @@
       ],
       "description": "Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.",
       "trailer": "https://www.youtube.com/watch?v=P3uI5sLosKU",
-      "posterPath": "/iPOn6DinuVyLY17YM9mKuPofV08.jpg",
-      "lastVerifiedAt": "2026-08-11T11:07:32.257Z"
+      "posterPath": "/ghF1JYv7P5BgWHYfq9dqhqqNfz8.jpg",
+      "lastVerifiedAt": "2026-08-24T10:56:30.121Z"
     },
     {
       "archiveId": "mcu-avengers-doomsday-2026",
@@ -133,12 +133,13 @@
         "David Jonsson",
         "Letitia Wright",
         "Winston Duke",
-        "Denzel Washington"
+        "Denzel Washington",
+        "Maya Boyd"
       ],
       "description": "T'Challa's son, T'Challa, comes of age with eyes on the crown of Wakanda.",
       "trailer": "https://www.youtube.com/watch?v=M0xHK86xXUc",
       "posterPath": "/zJc9fYZxgq4yzI0Oru2e1Cf3a3V.jpg",
-      "lastVerifiedAt": "2026-08-02T03:02:35.522Z"
+      "lastVerifiedAt": "2026-08-24T10:56:30.121Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1293690",
@@ -196,6 +197,18 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-08-24T10:56:30.121Z",
+      "type": "metadata",
+      "title": "Black Panther 3",
+      "detail": "cast: David Jonsson, Letitia Wright, Winston Duke, Denzel Washington → David Jonsson, Letitia Wright, Winston Duke, Denzel Washington, Maya Boyd"
+    },
+    {
+      "at": "2026-08-24T10:56:30.121Z",
+      "type": "metadata",
+      "title": "Spider-Man: Brand New Day",
+      "detail": "poster: /iPOn6DinuVyLY17YM9mKuPofV08.jpg → /ghF1JYv7P5BgWHYfq9dqhqqNfz8.jpg"
+    },
     {
       "at": "2026-08-20T10:50:28.245Z",
       "type": "metadata",
