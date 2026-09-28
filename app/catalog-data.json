@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.09.17.1",
+  "catalogVersion": "2026.09.28.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-09-24T15:12:17.471Z",
+    "lastCheckedAt": "2026-09-28T18:11:32.103Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
-      "lastVerifiedAt": "2026-09-17T15:04:32.325Z"
+      "posterPath": "/40jN1UgNAYEkGt2M0i81ghLF3cc.jpg",
+      "lastVerifiedAt": "2026-09-28T18:11:32.103Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -197,6 +197,12 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-09-28T18:11:32.103Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /jzPwsojjFStf5lR5Nm07w2hH56G.jpg → /40jN1UgNAYEkGt2M0i81ghLF3cc.jpg"
+    },
     {
       "at": "2026-09-17T15:04:32.325Z",
       "type": "metadata",
