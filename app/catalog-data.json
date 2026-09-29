@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.09.28.1",
+  "catalogVersion": "2026.09.29.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-09-28T18:11:32.103Z",
+    "lastCheckedAt": "2026-09-29T16:32:46.321Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/40jN1UgNAYEkGt2M0i81ghLF3cc.jpg",
-      "lastVerifiedAt": "2026-09-28T18:11:32.103Z"
+      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
+      "lastVerifiedAt": "2026-09-29T16:32:46.321Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -197,6 +197,12 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-09-29T16:32:46.321Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /40jN1UgNAYEkGt2M0i81ghLF3cc.jpg → /jzPwsojjFStf5lR5Nm07w2hH56G.jpg"
+    },
     {
       "at": "2026-09-28T18:11:32.103Z",
       "type": "metadata",
@@ -370,12 +376,6 @@
       "type": "discovered",
       "title": "Avengers: Secret Wars",
       "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
-    },
-    {
-      "at": "2026-08-01T00:00:00.000Z",
-      "type": "automation",
-      "title": "Catalog Steward enabled",
-      "detail": "Known Infinity Archive releases are now monitored for date changes, metadata updates, and release-day promotion."
     }
   ]
 }
