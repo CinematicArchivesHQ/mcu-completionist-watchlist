@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.10.07.1",
+  "catalogVersion": "2026.10.09.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-07T17:27:36.843Z",
+    "lastCheckedAt": "2026-10-09T17:01:53.586Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -194,9 +194,108 @@
       "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
       "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
       "lastVerifiedAt": "2026-08-20T10:50:28.245Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1792131",
+      "tmdbId": 1792131,
+      "mediaType": "movie",
+      "title": "Marvel Zombies: The Winter Soldier",
+      "expectedYear": 2027,
+      "releaseDate": "2027-10-31",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Animation"
+      ],
+      "cast": [],
+      "description": "The first of three specials following the events of the Marvel Zombies series.",
+      "trailer": "",
+      "posterPath": "/c0oRgXpM2MKJNUVDPIvGGfqFkCf.jpg",
+      "lastVerifiedAt": "2026-10-09T17:01:53.586Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1792135",
+      "tmdbId": 1792135,
+      "mediaType": "movie",
+      "title": "Marvel Zombies: The Fist of Khonshu",
+      "expectedYear": 2028,
+      "releaseDate": "2028-10-31",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Animation"
+      ],
+      "cast": [],
+      "description": "The second of three specials following the events of the Marvel Zombies series.",
+      "trailer": "",
+      "posterPath": "/okBea4JhKcfhHKgsm7QAKdnApZd.jpg",
+      "lastVerifiedAt": "2026-10-09T17:01:53.586Z"
+    },
+    {
+      "archiveId": "mcu-tmdb-movie-1792136",
+      "tmdbId": 1792136,
+      "mediaType": "movie",
+      "title": "Marvel Zombies: The Last Guardian",
+      "expectedYear": 2029,
+      "releaseDate": "2029-10-31",
+      "status": "upcoming",
+      "type": "Movie",
+      "phase": "Unassigned",
+      "scope": "official",
+      "runtime": null,
+      "genres": [
+        "Animation"
+      ],
+      "cast": [],
+      "description": "The last of three specials following the events of the Marvel Zombies series.",
+      "trailer": "",
+      "posterPath": "/fnDZonKWZyI1Pb7pD4QzEnOzfVt.jpg",
+      "lastVerifiedAt": "2026-10-09T17:01:53.586Z"
     }
   ],
   "changelog": [
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "metadata",
+      "title": "Marvel Zombies: The Last Guardian",
+      "detail": "genres:  → Animation"
+    },
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "metadata",
+      "title": "Marvel Zombies: The Fist of Khonshu",
+      "detail": "genres:  → Animation"
+    },
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "metadata",
+      "title": "Marvel Zombies: The Winter Soldier",
+      "detail": "genres:  → Animation"
+    },
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "discovered",
+      "title": "Marvel Zombies: The Last Guardian",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "discovered",
+      "title": "Marvel Zombies: The Fist of Khonshu",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
+    {
+      "at": "2026-10-09T17:01:53.586Z",
+      "type": "discovered",
+      "title": "Marvel Zombies: The Winter Soldier",
+      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
+    },
     {
       "at": "2026-10-07T17:27:36.843Z",
       "type": "metadata",
@@ -340,42 +439,6 @@
       "type": "metadata",
       "title": "Spider-Man: Brand New Day",
       "detail": "cast: Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jacob Batalon, Jon Bernthal, Mark Ruffalo, Florence Pugh → Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jon Bernthal, Jacob Batalon, Mark Ruffalo, Liza Colón-Zayas"
-    },
-    {
-      "at": "2026-08-03T13:22:18.709Z",
-      "type": "metadata",
-      "title": "Spider-Man: Brand New Day",
-      "detail": "cast: Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas → Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jacob Batalon, Jon Bernthal, Mark Ruffalo, Florence Pugh"
-    },
-    {
-      "at": "2026-08-02T03:02:35.522Z",
-      "type": "metadata",
-      "title": "Black Panther 3",
-      "detail": "genres:  → Science Fiction, Action, Adventure; cast:  → David Jonsson, Letitia Wright, Winston Duke, Denzel Washington; trailer:  → https://www.youtube.com/watch?v=M0xHK86xXUc"
-    },
-    {
-      "at": "2026-08-02T03:02:35.522Z",
-      "type": "metadata",
-      "title": "Avengers: Secret Wars",
-      "detail": "genres:  → Science Fiction, Action, Adventure; cast:  → Robert Downey Jr., Pedro Pascal, Vanessa Kirby, Ebon Moss-Bachrach, Joseph Quinn, Sebastian Stan, Florence Pugh, David Harbour"
-    },
-    {
-      "at": "2026-08-02T03:02:35.522Z",
-      "type": "metadata",
-      "title": "Avengers: Doomsday",
-      "detail": "runtime: not set → 165; genres: Superhero, Action, Science fiction → Science Fiction, Action, Adventure; cast: Robert Downey Jr., Chris Hemsworth, Pedro Pascal → Robert Downey Jr., Chris Evans, Chris Hemsworth, Pedro Pascal, Paul Rudd, Anthony Mackie, Florence Pugh, Vanessa Kirby; synopsis: Heroes from three distinct universes are set on a deadly collision course as an existential multiversal threat emerges. The Avengers, Wakandans, Fantastic Four, New Avengers, and X-Men must confront Victor von Doom before their worlds are destroyed. → Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.; poster: not set → /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg"
-    },
-    {
-      "at": "2026-08-02T03:02:35.522Z",
-      "type": "released",
-      "title": "Spider-Man: Brand New Day",
-      "detail": "runtime: not set → 145; genres: Superhero, Action, Adventure → Science Fiction, Action, Adventure; cast: Tom Holland, Zendaya, Jon Bernthal → Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas; synopsis: Alone in a New York City that no longer remembers Peter Parker, Peter has devoted himself to being a full-time Spider-Man. As the pressure intensifies, a surprising physical evolution threatens his existence and forces him into an uneasy alliance with the Punisher. → Fighting crime full-time as Spider-Man in a world that doesn't remember him—and the pressure of seeing his old friends move on without him—sparks a change in Peter Parker he may not have the power to control. But that transformation might also be the only thing that can stop a shocking new threat to the city and those he loves - a powerful villain no one can even see.; poster: not set → /iPOn6DinuVyLY17YM9mKuPofV08.jpg; trailer: https://www.youtube.com/watch?v=aBlsrtxuwss → https://www.youtube.com/watch?v=P3uI5sLosKU; archive status: upcoming → released"
-    },
-    {
-      "at": "2026-08-02T03:02:35.522Z",
-      "type": "discovered",
-      "title": "Black Panther 3",
-      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
     }
   ]
 }
