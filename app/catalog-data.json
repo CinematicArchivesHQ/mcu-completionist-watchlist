@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.10.12.1",
+  "catalogVersion": "2026.10.13.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-12T19:51:04.690Z",
+    "lastCheckedAt": "2026-10-13T17:38:41.199Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/gDkCXdxOrKRRa6t7uwOHDDj1Riu.jpg",
-      "lastVerifiedAt": "2026-10-12T19:51:04.690Z"
+      "posterPath": "/sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg",
+      "lastVerifiedAt": "2026-10-13T17:38:41.199Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -261,6 +261,12 @@
   ],
   "changelog": [
     {
+      "at": "2026-10-13T17:38:41.199Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /gDkCXdxOrKRRa6t7uwOHDDj1Riu.jpg → /sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg"
+    },
+    {
       "at": "2026-10-12T19:51:04.690Z",
       "type": "metadata",
       "title": "Avengers: Doomsday",
@@ -433,12 +439,6 @@
       "type": "metadata",
       "title": "Spider-Man: Brand New Day",
       "detail": "cast: Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jon Bernthal, Jacob Batalon, Mark Ruffalo, Liza Colón-Zayas → Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas"
-    },
-    {
-      "at": "2026-08-08T10:53:42.981Z",
-      "type": "metadata",
-      "title": "Avengers: Doomsday",
-      "detail": "poster: /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg → /bh2OuKvq19jBHsloUVCfPSZZw81.jpg"
     }
   ]
 }
