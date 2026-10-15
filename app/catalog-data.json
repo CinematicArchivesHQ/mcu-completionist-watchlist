@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.10.14.1",
+  "catalogVersion": "2026.10.15.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-14T15:12:56.664Z",
+    "lastCheckedAt": "2026-10-15T15:06:21.669Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
-      "lastVerifiedAt": "2026-10-14T15:12:56.664Z"
+      "posterPath": "/sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg",
+      "lastVerifiedAt": "2026-10-15T15:06:21.669Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -261,6 +261,12 @@
   ],
   "changelog": [
     {
+      "at": "2026-10-15T15:06:21.669Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /jzPwsojjFStf5lR5Nm07w2hH56G.jpg → /sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg"
+    },
+    {
       "at": "2026-10-14T15:12:56.664Z",
       "type": "metadata",
       "title": "Avengers: Doomsday",
@@ -433,12 +439,6 @@
       "type": "metadata",
       "title": "Avengers: Doomsday",
       "detail": "trailer: https://www.youtube.com/watch?v=irVNGjRFZGk → https://www.youtube.com/watch?v=X1aFkAkFASk"
-    },
-    {
-      "at": "2026-08-15T10:42:41.481Z",
-      "type": "discovered",
-      "title": "Untitled X-Men Film",
-      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
     }
   ]
 }
