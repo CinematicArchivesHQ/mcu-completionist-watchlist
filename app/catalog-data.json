@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.10.15.1",
+  "catalogVersion": "2026.10.16.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-15T15:06:21.669Z",
+    "lastCheckedAt": "2026-10-16T14:54:56.573Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg",
-      "lastVerifiedAt": "2026-10-15T15:06:21.669Z"
+      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
+      "lastVerifiedAt": "2026-10-16T14:54:56.573Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -261,6 +261,12 @@
   ],
   "changelog": [
     {
+      "at": "2026-10-16T14:54:56.573Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /sLYCyO58UvBuBtbHTQjPCCgJ4dG.jpg → /jzPwsojjFStf5lR5Nm07w2hH56G.jpg"
+    },
+    {
       "at": "2026-10-15T15:06:21.669Z",
       "type": "metadata",
       "title": "Avengers: Doomsday",
@@ -433,12 +439,6 @@
       "type": "metadata",
       "title": "Untitled X-Men Film",
       "detail": "genres:  → Science Fiction, Action, Adventure; cast:  → Samara Weaving, Kit Connor, Sadie Sink; poster: /qlzlNVlASmULE11U7d2LkUS1FKm.jpg → /pLtwkpq9vkl193Ce4hoMdwtKtAa.jpg"
-    },
-    {
-      "at": "2026-08-15T10:42:41.481Z",
-      "type": "metadata",
-      "title": "Avengers: Doomsday",
-      "detail": "trailer: https://www.youtube.com/watch?v=irVNGjRFZGk → https://www.youtube.com/watch?v=X1aFkAkFASk"
     }
   ]
 }
