@@ -3,7 +3,7 @@
   "catalogVersion": "2026.10.16.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-16T14:54:56.573Z",
+    "lastCheckedAt": "2026-10-23T15:10:07.111Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
