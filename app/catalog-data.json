@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.10.31.1",
+  "catalogVersion": "2026.11.01.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-10-31T15:46:38.708Z",
+    "lastCheckedAt": "2026-11-01T16:51:10.389Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/zHTxblqPcqRpA93ex2Hj0RdpVBs.jpg",
-      "lastVerifiedAt": "2026-10-31T15:46:38.708Z"
+      "posterPath": "/bqAHPSEyRkM4BpkncGFCKjBXf9p.jpg",
+      "lastVerifiedAt": "2026-11-01T16:51:10.389Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -188,13 +188,12 @@
         "Fantasy"
       ],
       "cast": [
-        "Ryan Gosling",
-        "Connor Storrie"
+        "Ryan Gosling"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics character of the same name. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
       "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
-      "lastVerifiedAt": "2026-10-31T15:46:38.708Z"
+      "lastVerifiedAt": "2026-11-01T16:51:10.389Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1792131",
@@ -261,6 +260,18 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-11-01T16:51:10.389Z",
+      "type": "metadata",
+      "title": "Ghost Rider",
+      "detail": "cast: Ryan Gosling, Connor Storrie → Ryan Gosling"
+    },
+    {
+      "at": "2026-11-01T16:51:10.389Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /zHTxblqPcqRpA93ex2Hj0RdpVBs.jpg → /bqAHPSEyRkM4BpkncGFCKjBXf9p.jpg"
+    },
     {
       "at": "2026-10-31T15:46:38.708Z",
       "type": "metadata",
@@ -428,18 +439,6 @@
       "type": "metadata",
       "title": "Untitled X-Men Film",
       "detail": "cast: Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver, Hudson Williams → Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver"
-    },
-    {
-      "at": "2026-08-18T10:49:40.557Z",
-      "type": "discovered",
-      "title": "Ghost Rider",
-      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
-    },
-    {
-      "at": "2026-08-17T10:50:26.715Z",
-      "type": "metadata",
-      "title": "Untitled X-Men Film",
-      "detail": "cast: Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver → Sadie Sink, Kit Connor, Christopher Abbott, Samara Weaving, Inde Navarrette, Maya Boyd, Adam Driver, Hudson Williams"
     }
   ]
 }
