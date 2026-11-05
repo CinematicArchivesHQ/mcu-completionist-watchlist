@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.11.04.1",
+  "catalogVersion": "2026.11.05.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-11-04T18:03:01.990Z",
+    "lastCheckedAt": "2026-11-05T18:05:41.993Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -189,12 +189,13 @@
       ],
       "cast": [
         "Ryan Gosling",
-        "Sacha Baron Cohen"
+        "Sacha Baron Cohen",
+        "Connor Storrie"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics character of the same name. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
       "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
-      "lastVerifiedAt": "2026-11-04T18:03:01.990Z"
+      "lastVerifiedAt": "2026-11-05T18:05:41.993Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1792131",
@@ -261,6 +262,12 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-11-05T18:05:41.993Z",
+      "type": "metadata",
+      "title": "Ghost Rider",
+      "detail": "cast: Ryan Gosling, Sacha Baron Cohen → Ryan Gosling, Sacha Baron Cohen, Connor Storrie"
+    },
     {
       "at": "2026-11-04T18:03:01.990Z",
       "type": "metadata",
@@ -434,12 +441,6 @@
       "type": "metadata",
       "title": "Black Panther 3",
       "detail": "cast: David Jonsson, Letitia Wright, Winston Duke, Denzel Washington → David Jonsson, Letitia Wright, Winston Duke, Denzel Washington, Maya Boyd"
-    },
-    {
-      "at": "2026-08-24T10:56:30.121Z",
-      "type": "metadata",
-      "title": "Spider-Man: Brand New Day",
-      "detail": "poster: /iPOn6DinuVyLY17YM9mKuPofV08.jpg → /ghF1JYv7P5BgWHYfq9dqhqqNfz8.jpg"
     }
   ]
 }
