@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.11.11.1",
+  "catalogVersion": "2026.11.12.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-11-11T17:56:34.649Z",
+    "lastCheckedAt": "2026-11-12T18:23:38.712Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/jzPwsojjFStf5lR5Nm07w2hH56G.jpg",
-      "lastVerifiedAt": "2026-11-11T17:56:34.649Z"
+      "posterPath": "/tTMmREfhVd51CCg7GN73wL8cIoT.jpg",
+      "lastVerifiedAt": "2026-11-12T18:23:38.712Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -188,13 +188,12 @@
         "Fantasy"
       ],
       "cast": [
-        "Ryan Gosling",
-        "Connor Storrie"
+        "Ryan Gosling"
       ],
       "description": "A film set in the Marvel Cinematic Universe (MCU) based on the Marvel Comics character of the same name. Plot TBA.",
       "trailer": "https://www.youtube.com/watch?v=r-JdSUy1vaY",
       "posterPath": "/zgC1zo3lyujoEiIMnUrHltvPmZg.jpg",
-      "lastVerifiedAt": "2026-11-10T17:55:57.050Z"
+      "lastVerifiedAt": "2026-11-12T18:23:38.712Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1792131",
@@ -261,6 +260,18 @@
     }
   ],
   "changelog": [
+    {
+      "at": "2026-11-12T18:23:38.712Z",
+      "type": "metadata",
+      "title": "Ghost Rider",
+      "detail": "cast: Ryan Gosling, Connor Storrie → Ryan Gosling"
+    },
+    {
+      "at": "2026-11-12T18:23:38.712Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /jzPwsojjFStf5lR5Nm07w2hH56G.jpg → /tTMmREfhVd51CCg7GN73wL8cIoT.jpg"
+    },
     {
       "at": "2026-11-11T17:56:34.649Z",
       "type": "metadata",
@@ -428,18 +439,6 @@
       "type": "discovered",
       "title": "Marvel Zombies: The Winter Soldier",
       "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
-    },
-    {
-      "at": "2026-10-07T17:27:36.843Z",
-      "type": "metadata",
-      "title": "Spider-Man: Brand New Day",
-      "detail": "cast: Tom Holland, Zendaya, Mark Ruffalo, Jon Bernthal, Jacob Batalon, Sadie Sink, Florence Pugh, Liza Colón-Zayas → Tom Holland, Sadie Sink, Tramell Tillman, Zendaya, Jacob Batalon, Jon Bernthal, Mark Ruffalo, Florence Pugh"
-    },
-    {
-      "at": "2026-09-29T16:32:46.321Z",
-      "type": "metadata",
-      "title": "Avengers: Doomsday",
-      "detail": "poster: /40jN1UgNAYEkGt2M0i81ghLF3cc.jpg → /jzPwsojjFStf5lR5Nm07w2hH56G.jpg"
     }
   ]
 }
