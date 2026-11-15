@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.11.12.1",
+  "catalogVersion": "2026.11.15.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-11-12T18:23:38.712Z",
+    "lastCheckedAt": "2026-11-15T17:15:39.688Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/tTMmREfhVd51CCg7GN73wL8cIoT.jpg",
-      "lastVerifiedAt": "2026-11-12T18:23:38.712Z"
+      "posterPath": "/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg",
+      "lastVerifiedAt": "2026-11-15T17:15:39.688Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -261,6 +261,12 @@
   ],
   "changelog": [
     {
+      "at": "2026-11-15T17:15:39.688Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /tTMmREfhVd51CCg7GN73wL8cIoT.jpg → /1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg"
+    },
+    {
       "at": "2026-11-12T18:23:38.712Z",
       "type": "metadata",
       "title": "Ghost Rider",
@@ -432,12 +438,6 @@
       "at": "2026-10-09T17:01:53.586Z",
       "type": "discovered",
       "title": "Marvel Zombies: The Fist of Khonshu",
-      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
-    },
-    {
-      "at": "2026-10-09T17:01:53.586Z",
-      "type": "discovered",
-      "title": "Marvel Zombies: The Winter Soldier",
       "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
     }
   ]
