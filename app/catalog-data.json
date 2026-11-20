@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "catalogVersion": "2026.11.19.1",
+  "catalogVersion": "2026.11.20.1",
   "steward": {
     "source": "TMDB",
-    "lastCheckedAt": "2026-11-19T19:03:01.454Z",
+    "lastCheckedAt": "2026-11-20T18:39:31.622Z",
     "automaticDiscovery": true,
     "healthCommitIntervalDays": 7
   },
@@ -77,8 +77,8 @@
       ],
       "description": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
       "trailer": "https://www.youtube.com/watch?v=X1aFkAkFASk",
-      "posterPath": "/cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg",
-      "lastVerifiedAt": "2026-11-19T19:03:01.454Z"
+      "posterPath": "/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg",
+      "lastVerifiedAt": "2026-11-20T18:39:31.622Z"
     },
     {
       "archiveId": "mcu-tmdb-movie-1003598",
@@ -261,6 +261,12 @@
   ],
   "changelog": [
     {
+      "at": "2026-11-20T18:39:31.622Z",
+      "type": "metadata",
+      "title": "Avengers: Doomsday",
+      "detail": "poster: /cWXtJhrlruF8CeYuaBGE8vdj3Q9.jpg → /1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg"
+    },
+    {
       "at": "2026-11-19T19:03:01.454Z",
       "type": "metadata",
       "title": "Avengers: Doomsday",
@@ -433,12 +439,6 @@
       "type": "metadata",
       "title": "Marvel Zombies: The Winter Soldier",
       "detail": "genres:  → Animation"
-    },
-    {
-      "at": "2026-10-09T17:01:53.586Z",
-      "type": "discovered",
-      "title": "Marvel Zombies: The Last Guardian",
-      "detail": "Automatically added from the exact Marvel Studios + Marvel Cinematic Universe (MCU) TMDB intersection."
     }
   ]
 }
